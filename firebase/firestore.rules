@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  function isAuthenticated() {
+      return request.auth != null;
+  }
+
+  // サインインしており自身が作成したデータにのみアクセスできる
+  function isUserAuthenticated(userId) {
+      return isAuthenticated() && userId == request.auth.uid;
+  }
+
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    match /users/{userId}/memos/{memoId} {
+      allow read, update, delete: if isUserAuthenticated(userId);
+      allow create: if isAuthenticated();
+    }
+  }
+}
