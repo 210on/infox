@@ -18,7 +18,7 @@ export function Memo(): JSX.Element {
 
   const params = useParams();
   const id = params.id;
-  const screenTitle = (!id ? "Crate" : "Update") + " memo";
+  const screenTitle = (!id ? "Create" : "Update") + " memo";
 
   const navigate = useNavigate();
 
