@@ -38,6 +38,17 @@ export function MemoList(): JSX.Element {
     try {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
+        // 文字列順にメモをソートする
+        _memoList.sort((a, b) => {
+          if (a.title < b.title) {
+            return -1;
+          }
+          if (a.title > b.title) {
+            return 1;
+          }
+          return 0;
+        });
+
         setMemoList(_memoList);
       }
     } catch (e) {
@@ -49,6 +60,7 @@ export function MemoList(): JSX.Element {
       });
     }
   }, [loginUser, setMemoList, setMessageAtom]);
+
 
   const onClickDelete = async (id?: string) => {
     if (!id) {
