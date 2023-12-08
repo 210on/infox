@@ -5,6 +5,11 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Switch,
+  FormControlLabel
 } from "@mui/material";
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
@@ -25,6 +30,9 @@ export function MemoList(): JSX.Element {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | undefined>();
   const navigate = useNavigate();
+  const [defaultOrder, setDefaultOrder] = useState<Memo[]>([]);
+  const [orderBy, setOrderBy] = useState("default");
+  const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -39,16 +47,15 @@ export function MemoList(): JSX.Element {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
         setMemoList(_memoList);
+        setDefaultOrder([..._memoList]); // Save default order
       }
     } catch (e) {
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...exceptionMessage(),
-        };
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...exceptionMessage(),
+      }));
     }
-  }, [loginUser, setMemoList, setMessageAtom]);
+  }, [loginUser, setMessageAtom]);
 
   const onClickDelete = async (id?: string) => {
     if (!id) {
@@ -57,22 +64,17 @@ export function MemoList(): JSX.Element {
 
     try {
       await deleteMemo(id, loginUser);
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...successMessage("Deleted"),
-        };
-      });
-      setMemoList((prev) => {
-        return prev.filter((memo) => memo.id !== id);
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...successMessage("Deleted"),
+      }));
+      setMemoList((prev) => prev.filter((memo) => memo.id !== id));
+      setDefaultOrder((prev) => prev.filter((memo) => memo.id !== id));
     } catch (e) {
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...exceptionMessage(),
-        };
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...exceptionMessage(),
+      }));
     }
   };
 
@@ -80,46 +82,87 @@ export function MemoList(): JSX.Element {
     getMemoList();
   }, [loginUser, getMemoList]);
 
+  const handleSortChange = (event: SelectChangeEvent<string>) => {
+    const selectedOrder = event.target.value as string;
+    setOrderBy(selectedOrder);
+    let sortedList = [...memoList];
+    if (selectedOrder === "title") {
+      sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
+    }
+    if (reverseOrder) {
+      sortedList.reverse(); // 逆順にする
+    }
+    setMemoList(selectedOrder === "default" ? defaultOrder : sortedList);
+  };
+
+  const handleNewMemo = () => {
+    moveToMemo();
+  };
+
+  const handleReverseToggle = () => {
+    setReverseOrder(!reverseOrder);
+    setMemoList((prevList) => [...prevList].reverse());
+  };
+
   return (
     <>
-      <Typography variant="h2">Memo</Typography>
+      <Typography variant="h2">Infox</Typography>
       <Box
         sx={{
           paddingTop: "40px",
           paddingBottom: "40px",
         }}
       >
-        <Box display="flex" justifyContent="flex-end">
-          <Button variant="contained" onClick={() => moveToMemo()}>
+
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          marginBottom="20px"
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography variant="body1" sx={{ marginRight: "10px" }}>
+            Sort by:
+          </Typography>
+          <Select value={orderBy} onChange={handleSortChange}>
+            <MenuItem value="default">Default</MenuItem>
+            <MenuItem value="title">Title</MenuItem>
+            {/* ここに他の並び替えオプションを追加 */}
+          </Select>
+          <FormControlLabel
+            control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
+            label="Reverse"
+            labelPlacement="start"
+          />
+          </Box>
+          <Button variant="contained" onClick={handleNewMemo}>
             New memo
           </Button>
         </Box>
-        {memoList.map((memo) => {
-          return (
-            <ListItem
-              alignItems="flex-start"
-              key={memo.id}
-              sx={{ cursor: "pointer" }}
-              secondaryAction={
-                <IconButton
-                  aria-label="delete"
-                  onClick={() => {
-                    setSelectedMemoId(memo.id);
-                    setOpenDialog(true);
-                  }}
-                >
-                  <Delete />
-                </IconButton>
-              }
-            >
-              <ListItemText
-                primary={memo.title}
-                secondary={memo.content}
-                onClick={() => moveToMemo(memo.id)}
-              />
-            </ListItem>
-          );
-        })}
+
+        {memoList.map((memo) => (
+          <ListItem
+            key={memo.id}
+            sx={{ cursor: "pointer" }}
+            secondaryAction={
+              <IconButton
+                aria-label="delete"
+                onClick={() => {
+                  setSelectedMemoId(memo.id);
+                  setOpenDialog(true);
+                }}
+              >
+                <Delete />
+              </IconButton>
+            }
+          >
+            <ListItemText
+              primary={memo.title}
+              secondary={memo.content}
+              onClick={() => moveToMemo(memo.id)}
+            />
+          </ListItem>
+        ))}
       </Box>
       <SimpleDialog
         open={openDialog}
