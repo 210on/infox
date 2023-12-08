@@ -95,7 +95,7 @@ export function MemoList(): JSX.Element {
 
   return (
     <>
-      <Typography variant="h2">Memo</Typography>
+      <Typography variant="h2">Infox</Typography>
       <Box
         sx={{
           paddingTop: "40px",

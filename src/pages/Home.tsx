@@ -31,7 +31,15 @@ export function Home(): JSX.Element {
 
   return (
     <>
-      <Typography variant="h2">Top page</Typography>
+      <Typography variant="h2">Infox</Typography>
+      <Typography variant="body1">
+        <br />
+        Infoxとは、シンプルなツールでスマートに知識を集積・体系化したい<br />
+        大学生向けに作られたWebAppです。<br />
+        これは自身の経験・知識を簡単に集積・体系化ができ、<br />
+        その他のメモ帳ツールとは違って、 <br />
+        シンプルで使いやすいUIと体系化機能が備わっています。
+      </Typography>
       <Box
         sx={{
           paddingTop: "40px",
