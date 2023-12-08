@@ -8,6 +8,8 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Switch,
+  FormControlLabel
 } from "@mui/material";
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
@@ -30,6 +32,7 @@ export function MemoList(): JSX.Element {
   const navigate = useNavigate();
   const [defaultOrder, setDefaultOrder] = useState<Memo[]>([]);
   const [orderBy, setOrderBy] = useState("default");
+  const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -80,17 +83,25 @@ export function MemoList(): JSX.Element {
   }, [loginUser, getMemoList]);
 
   const handleSortChange = (event: SelectChangeEvent<string>) => {
-    const selectedOrder = event.target.value;
+    const selectedOrder = event.target.value as string;
     setOrderBy(selectedOrder);
     let sortedList = [...memoList];
     if (selectedOrder === "title") {
       sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
+    }
+    if (reverseOrder) {
+      sortedList.reverse(); // 逆順にする
     }
     setMemoList(selectedOrder === "default" ? defaultOrder : sortedList);
   };
 
   const handleNewMemo = () => {
     moveToMemo();
+  };
+
+  const handleReverseToggle = () => {
+    setReverseOrder(!reverseOrder);
+    setMemoList((prevList) => [...prevList].reverse());
   };
 
   return (
@@ -118,6 +129,11 @@ export function MemoList(): JSX.Element {
             <MenuItem value="title">Title</MenuItem>
             {/* ここに他の並び替えオプションを追加 */}
           </Select>
+          <FormControlLabel
+            control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
+            label="Reverse"
+            labelPlacement="start"
+          />
           </Box>
           <Button variant="contained" onClick={handleNewMemo}>
             New memo
