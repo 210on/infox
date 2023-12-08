@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown';
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
@@ -34,21 +35,16 @@ export function Memo(): JSX.Element {
     const updatedAt = new Date();
     try {
       await saveMemo({ id, title, content, updatedAt }, loginUser);
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...successMessage("Saved"),
-        };
-      });
-
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...successMessage("Saved"),
+      }));
       backToMemoList();
     } catch (e) {
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...exceptionMessage(),
-        };
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...exceptionMessage(),
+      }));
     }
   };
 
@@ -66,12 +62,10 @@ export function Memo(): JSX.Element {
           setContent(memo.content);
         }
       } catch (e) {
-        setMessageAtom((prev) => {
-          return {
-            ...prev,
-            ...exceptionMessage(),
-          };
-        });
+        setMessageAtom((prev) => ({
+          ...prev,
+          ...exceptionMessage(),
+        }));
       }
     };
 
@@ -121,6 +115,16 @@ export function Memo(): JSX.Element {
             >
               Cancel
             </Button>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} sx={{ width: "50%" }}>
+          <Grid item xs={12}>
+            <Typography variant="h5">Title</Typography>
+            <Typography>{title}</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="h5">Content</Typography>
+            <ReactMarkdown>{content}</ReactMarkdown>
           </Grid>
         </Grid>
       </Box>
