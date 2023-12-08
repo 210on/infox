@@ -1,4 +1,4 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, MenuItem, Select, SelectChangeEvent, Grid, TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { saveMemo } from "../services/saveMemo";
@@ -15,12 +15,19 @@ export function Memo(): JSX.Element {
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
+  const [textColor, setTextColor] = useState("green"); // デフォルトのテキスト色（黒色）を設定
 
   const params = useParams();
   const id = params.id;
   const screenTitle = (!id ? "Create" : "Update") + " memo";
 
   const navigate = useNavigate();
+
+  // ドロップダウンで色が選択されたときに呼ばれる関数
+  const handleTextColorChange = (event: SelectChangeEvent<string>) => {
+    setTextColor(event.target.value); // 選択された色をセット
+  };
+  
 
   const backToMemoList = () => {
     navigate("/memolist");
@@ -108,7 +115,18 @@ export function Memo(): JSX.Element {
               fullWidth
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              InputProps={{ style: { color: textColor } }}
             />
+          </Grid>
+          <Grid item xs={12}>
+            {/* ドロップダウンメニュー */}
+            <Select value={textColor} onChange={handleTextColorChange}>
+              <MenuItem value="black">Black</MenuItem>
+              <MenuItem value="red">Red</MenuItem>
+              <MenuItem value="green">Green</MenuItem>
+              <MenuItem value="blue">Blue</MenuItem>
+              {/* 他の色の選択肢を追加できます */}
+            </Select>
           </Grid>
           <Grid item xs={12}>
             <Button variant="contained" onClick={() => save()}>
