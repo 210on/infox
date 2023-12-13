@@ -23,8 +23,6 @@ import { deleteMemo } from "../services/deleteMemo";
 import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
-import Sidebar from "../components/Sidebar"; 
-import MenuIcon from "@mui/icons-material/Menu";
 
 
 
@@ -39,7 +37,6 @@ export function MemoList(): JSX.Element {
   const [orderBy, setOrderBy] = useState("default");
   const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
   const [searchKeyword, setSearchKeyword] = useState<string>("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // サイドバーの開閉フラグ
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -134,19 +131,8 @@ export function MemoList(): JSX.Element {
     setSearchKeyword(event.target.value);
   };
 
-  const handleSidebarOpen = () => {
-    setIsSidebarOpen(true);
-
-  const handleSidebarClose = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
     <>
-      <IconButton onClick={handleSidebarOpen}>
-        <MenuIcon />
-      </IconButton>
-      <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} />
       <Typography variant="h2">Infox</Typography>
       <Box
         sx={{
