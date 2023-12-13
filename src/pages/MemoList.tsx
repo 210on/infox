@@ -124,7 +124,7 @@ export function MemoList(): JSX.Element {
           <Typography variant="body1" sx={{ marginRight: "10px" }}>
             Sort by:
           </Typography>
-          <Select value={orderBy} onChange={handleSortChange}>
+          <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
             <MenuItem value="default">Default</MenuItem>
             <MenuItem value="title">Title</MenuItem>
             {/* ここに他の並び替えオプションを追加 */}
@@ -140,7 +140,12 @@ export function MemoList(): JSX.Element {
           </Button>
         </Box>
 
-        {memoList.map((memo) => (
+        {memoList.map((memo) => {
+            let createdAtDate;
+            console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
+            const timestamp = memo.createdAt as any;
+            createdAtDate = new Date(timestamp.seconds * 1000);
+            return (
           <ListItem
             key={memo.id}
             sx={{ cursor: "pointer" }}
@@ -158,11 +163,11 @@ export function MemoList(): JSX.Element {
           >
             <ListItemText
               primary={memo.title}
-              secondary={memo.content}
+              secondary={`${memo.content} - Created at: ${createdAtDate.toLocaleDateString()}`}
               onClick={() => moveToMemo(memo.id)}
             />
           </ListItem>
-        ))}
+        );})}
       </Box>
       <SimpleDialog
         open={openDialog}

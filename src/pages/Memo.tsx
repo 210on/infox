@@ -23,12 +23,12 @@ export function Memo(): JSX.Element {
   const screenTitle = (!id ? "Create" : "Update") + " memo";
 
   const navigate = useNavigate();
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
 
   // ドロップダウンで色が選択されたときに呼ばれる関数
   const handleTextColorChange = (event: SelectChangeEvent<string>) => {
     setTextColor(event.target.value); // 選択された色をセット
   };
-  
 
   const backToMemoList = () => {
     navigate("/memolist");
@@ -40,8 +40,11 @@ export function Memo(): JSX.Element {
       return;
     }
     const updatedAt = new Date();
+    if (!id && !createdAt) {
+      setCreatedAt(updatedAt);
+    }
     try {
-      await saveMemo({ id, title, content, updatedAt }, loginUser);
+      await saveMemo({ id, title, content, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
       setMessageAtom((prev) => ({
         ...prev,
         ...successMessage("Saved"),

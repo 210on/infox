@@ -3,4 +3,5 @@ export type Memo = {
   title: string;
   content: string;
   updatedAt: Date;
+  createdAt: Date;
 };
