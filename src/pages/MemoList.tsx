@@ -145,6 +145,11 @@ export function MemoList(): JSX.Element {
             console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
             const timestamp = memo.createdAt as any;
             createdAtDate = new Date(timestamp.seconds * 1000);
+
+            const truncateText = (text:string, maxLength:number) => {
+              return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            };
+
             return (
           <ListItem
             key={memo.id}
@@ -162,8 +167,19 @@ export function MemoList(): JSX.Element {
             }
           >
             <ListItemText
-              primary={memo.title}
-              secondary={`${memo.content} - Created at: ${createdAtDate.toLocaleDateString()}`}
+              primary={
+                <>
+                  <span>{memo.title}</span>
+                  <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                    (Created: {createdAtDate.toLocaleDateString()})
+                  </span>
+                </>
+              }
+              secondary={
+                <>
+                  <div>{truncateText(memo.content, 100)}</div>
+                </>
+              }
               onClick={() => moveToMemo(memo.id)}
             />
           </ListItem>
