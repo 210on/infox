@@ -93,6 +93,13 @@ export function MemoList(): JSX.Element {
     if (selectedOrder === "title") {
       sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
     }
+    if (selectedOrder === "date") {
+      sortedList = [...memoList].sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+        return dateA.getTime() - dateB.getTime();
+      });
+    }
     if (reverseOrder) {
       sortedList.reverse(); // 逆順にする
     }
@@ -154,6 +161,7 @@ export function MemoList(): JSX.Element {
           <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
             <MenuItem value="default">Default</MenuItem>
             <MenuItem value="title">Title</MenuItem>
+            <MenuItem value="date">Date</MenuItem>
             {/* ここに他の並び替えオプションを追加 */}
           </Select>
           <FormControlLabel
@@ -181,11 +189,11 @@ export function MemoList(): JSX.Element {
         </Box>
 
         {memoList.map((memo) => {
-            let createdAtDate;
-            console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
-            const timestamp = memo.createdAt as any;
-            createdAtDate = new Date(timestamp.seconds * 1000);
 
+            //console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
+            const timestamp = memo.createdAt as any;
+            const createdAtDate = new Date(timestamp.seconds * 1000);
+            const formattedDateTime = createdAtDate.toLocaleString();
             const truncateText = (text:string, maxLength:number) => {
               return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
             };
@@ -211,13 +219,13 @@ export function MemoList(): JSX.Element {
                 <>
                   <span>{memo.title}</span>
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    (Created: {createdAtDate.toLocaleDateString()})
+                    (Created: {formattedDateTime})
                   </span>
                 </>
               }
               secondary={
                 <>
-                  <div>{truncateText(memo.content, 100)}</div>
+                  <span>{truncateText(memo.content, 100)}</span>
                 </>
               }
               onClick={() => moveToMemo(memo.id)}
