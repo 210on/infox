@@ -39,6 +39,7 @@ export function Home(): JSX.Element {
         これは自身の経験・知識を簡単に集積・体系化ができ、<br />
         その他のメモ帳ツールとは違って、 <br />
         シンプルで使いやすいUIと体系化機能が備わっています。
+        aaaa
       </Typography>
       <Box
         sx={{
