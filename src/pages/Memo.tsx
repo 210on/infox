@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { Box, Button, Grid, MenuItem, Select, SelectChangeEvent, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, MenuItem, Select, SelectChangeEvent,  TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { saveMemo } from "../services/saveMemo";
@@ -8,8 +8,8 @@ import { messageAtom } from "../states/messageAtom";
 import { useNavigate, useParams } from "react-router-dom";
 import { searchMemoById } from "../services/searchMemo";
 import { exceptionMessage, successMessage } from "../utils/messages";
-import Sidebar from "../components/Sidebar"; 
-import MenuIcon from "@mui/icons-material/Menu";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -19,7 +19,7 @@ export function Memo(): JSX.Element {
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
   const [textColor, setTextColor] = useState("black"); // デフォルトのテキスト色（黒色）を設定
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // サイドバーの開閉フラグ
+  const [tag, setTag] = useState("");//タグの追加
 
   const params = useParams();
   const id = params.id;
@@ -43,21 +43,29 @@ export function Memo(): JSX.Element {
       return;
     }
     const updatedAt = new Date();
+    let memoCreatedAt = createdAt;
     if (!id && !createdAt) {
       setCreatedAt(updatedAt);
     }
-    try {
-      await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-      setMessageAtom((prev) => ({
-        ...prev,
-        ...successMessage("Saved"),
-      }));
-      backToMemoList();
-    } catch (e) {
-      setMessageAtom((prev) => ({
-        ...prev,
-        ...exceptionMessage(),
-      }));
+    if (memoCreatedAt) {
+      try {
+        //await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
+        await saveMemo({ id, title, content, textColor, tag, updatedAt, createdAt: memoCreatedAt }, loginUser);
+        setMessageAtom((prev) => ({
+          ...prev,
+          ...successMessage("Saved"),
+        }));
+        navigate("/memolist");
+        //backToMemoList();
+      } catch (e) {
+        setMessageAtom((prev) => ({
+          ...prev,
+          ...exceptionMessage(),
+        }));
+      }
+    } else {
+      // createdAt が null の場合のエラーハンドリング
+      console.error("createdAt is null");
     }
   };
 
@@ -72,7 +80,9 @@ export function Memo(): JSX.Element {
         if (memo) {
           setTitle(memo.title);
           setContent(memo.content);
-          setTextColor(memo.textColor || 'black'); // textColor がない場合はデフォルト色を使用
+          setTextColor(memo.textColor);
+          setCreatedAt(memo.createdAt);
+          setTag(memo.tag);
         }
       } catch (e) {
         setMessageAtom((prev) => ({
@@ -85,21 +95,10 @@ export function Memo(): JSX.Element {
     get();
   }, [id, loginUser, setMessageAtom]);
 
-  const handleSidebarOpen = () => {
-    setIsSidebarOpen(true);
-  };
-
-  const handleSidebarClose = () => {
-    setIsSidebarOpen(false);
-  };
 
 
   return (
     <>
-    <IconButton onClick={handleSidebarOpen}>
-    <MenuIcon />
-    </IconButton>
-    <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} />
     <Box sx={{ display: "flex" }}>
       <Box sx={{ flex: 1, paddingRight: "16px" }}>
         {/* 左側のフォーム部分 */}
@@ -120,14 +119,18 @@ export function Memo(): JSX.Element {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Content"
-                multiline
-                rows={4}
-                fullWidth
+              <ReactQuill
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                InputProps={{ style: { color: textColor } }}
+                onChange={setContent}
+                modules={{
+                  toolbar: [
+                    [{ 'header': 1 }, { 'header': 2 }],
+                    ['bold', 'strike'],
+                    ['blockquote'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, 'clean']
+                  ]
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -140,6 +143,18 @@ export function Memo(): JSX.Element {
                 {/* 他の色の選択肢を追加できます */}
               </Select>
             </Grid>
+
+              {/* タグ */}
+            <Grid item xs={12}>
+              <TextField
+                  label="Tag"
+                  variant="outlined"
+                  fullWidth
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save
