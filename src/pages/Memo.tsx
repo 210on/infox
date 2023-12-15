@@ -17,7 +17,7 @@ export function Memo(): JSX.Element {
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
   const [textColor, setTextColor] = useState("black"); // デフォルトのテキスト色（黒色）を設定
-
+//テストsuzu
   const params = useParams();
   const id = params.id;
   const screenTitle = (!id ? "Create" : "Update") + " memo";
