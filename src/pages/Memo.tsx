@@ -43,21 +43,29 @@ export function Memo(): JSX.Element {
       return;
     }
     const updatedAt = new Date();
+    let memoCreatedAt = createdAt;
     if (!id && !createdAt) {
       setCreatedAt(updatedAt);
     }
-    try {
-      await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-      setMessageAtom((prev) => ({
-        ...prev,
-        ...successMessage("Saved"),
-      }));
-      backToMemoList();
-    } catch (e) {
-      setMessageAtom((prev) => ({
-        ...prev,
-        ...exceptionMessage(),
-      }));
+    if (memoCreatedAt) {
+      try {
+        //await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
+        await saveMemo({ id, title, content, textColor, updatedAt, createdAt: memoCreatedAt }, loginUser);
+        setMessageAtom((prev) => ({
+          ...prev,
+          ...successMessage("Saved"),
+        }));
+        navigate("/memolist");
+        //backToMemoList();
+      } catch (e) {
+        setMessageAtom((prev) => ({
+          ...prev,
+          ...exceptionMessage(),
+        }));
+      }
+    } else {
+      // createdAt が null の場合のエラーハンドリング
+      console.error("createdAt is null");
     }
   };
 
@@ -73,6 +81,7 @@ export function Memo(): JSX.Element {
           setTitle(memo.title);
           setContent(memo.content);
           setTextColor(memo.textColor || 'black'); // textColor がない場合はデフォルト色を使用
+          setCreatedAt(memo.createdAt);
         }
       } catch (e) {
         setMessageAtom((prev) => ({
