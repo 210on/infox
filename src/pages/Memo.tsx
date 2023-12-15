@@ -17,7 +17,8 @@ export function Memo(): JSX.Element {
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
   const [textColor, setTextColor] = useState("black"); // デフォルトのテキスト色（黒色）を設定
-//テストsuzu
+  const [tag, setTag] = useState("");//タグの追加
+
   const params = useParams();
   const id = params.id;
   const screenTitle = (!id ? "Create" : "Update") + " memo";
@@ -47,7 +48,7 @@ export function Memo(): JSX.Element {
     if (memoCreatedAt) {
       try {
         //await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-        await saveMemo({ id, title, content, textColor, updatedAt, createdAt: memoCreatedAt }, loginUser);
+        await saveMemo({ id, title, content, textColor, tag, updatedAt, createdAt: memoCreatedAt }, loginUser);
         setMessageAtom((prev) => ({
           ...prev,
           ...successMessage("Saved"),
@@ -79,6 +80,7 @@ export function Memo(): JSX.Element {
           setContent(memo.content);
           setTextColor(memo.textColor || 'black'); // textColor がない場合はデフォルト色を使用
           setCreatedAt(memo.createdAt);
+          setTag(memo.tag);
         }
       } catch (e) {
         setMessageAtom((prev) => ({
@@ -135,6 +137,18 @@ export function Memo(): JSX.Element {
                 {/* 他の色の選択肢を追加できます */}
               </Select>
             </Grid>
+
+              {/* タグ */}
+            <Grid item xs={12}>
+              <TextField
+                  label="Tag"
+                  variant="outlined"
+                  fullWidth
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save
