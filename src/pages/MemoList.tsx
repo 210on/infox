@@ -53,12 +53,8 @@ export function MemoList(): JSX.Element {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
         setMemoList(_memoList);
-<<<<<<< HEAD
         setUpdateOrder([..._memoList]); // Save update order
-=======
-        setDefaultOrder([..._memoList]); // Save default order
         setOriginalMemoList([..._memoList]);
->>>>>>> 89837596679309c2e4a8feb5a3b0fd712b8c7a00
       }
     } catch (e) {
       setMessageAtom((prev) => ({
@@ -130,13 +126,10 @@ export function MemoList(): JSX.Element {
   );
   const searchMemos = (keyword: string) => {
     if (keyword.trim() === "") {
-<<<<<<< HEAD
       // 検索キーワードが空の場合はデフォルトのメモリストを表示
       setMemoList([...updateOrder]);
-=======
       setMemoList([...originalMemoList]);
       setShowNoResults(false); // 検索キーワードが空の場合はメッセージを非表示にする
->>>>>>> 89837596679309c2e4a8feb5a3b0fd712b8c7a00
     } else {
       const filteredMemos = originalMemoList.filter(
         (memo) =>
