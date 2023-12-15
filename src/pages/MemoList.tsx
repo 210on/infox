@@ -236,6 +236,9 @@ export function MemoList(): JSX.Element {
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
                     (Created at: {formattedDateTime})
                   </span>
+                  <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                    {"#" + truncateText(memo.tag, 100)}
+                  </span>
                 </>
               }
               secondary={
@@ -243,6 +246,7 @@ export function MemoList(): JSX.Element {
                   <span>{truncateText(memo.content, 100)}</span>
                 </>
               }
+              
               onClick={() => moveToMemo(memo.id)}
             />
           </ListItem>
