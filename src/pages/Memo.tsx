@@ -8,6 +8,8 @@ import { messageAtom } from "../states/messageAtom";
 import { useNavigate, useParams } from "react-router-dom";
 import { searchMemoById } from "../services/searchMemo";
 import { exceptionMessage, successMessage } from "../utils/messages";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -78,7 +80,7 @@ export function Memo(): JSX.Element {
         if (memo) {
           setTitle(memo.title);
           setContent(memo.content);
-          setTextColor(memo.textColor || 'black'); // textColor がない場合はデフォルト色を使用
+          setTextColor(memo.textColor);
           setCreatedAt(memo.createdAt);
           setTag(memo.tag);
         }
@@ -117,14 +119,18 @@ export function Memo(): JSX.Element {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Content"
-                multiline
-                rows={4}
-                fullWidth
+              <ReactQuill
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                InputProps={{ style: { color: textColor } }}
+                onChange={setContent}
+                modules={{
+                  toolbar: [
+                    [{ 'header': 1 }, { 'header': 2 }],
+                    ['bold', 'strike'],
+                    ['blockquote'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, 'clean']
+                  ]
+                }}
               />
             </Grid>
             <Grid item xs={12}>
