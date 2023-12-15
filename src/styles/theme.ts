@@ -11,6 +11,9 @@ export const theme = createTheme({
     secondary: {
       main: "#f6f6f6",
     },
+    success: {
+      main: "#f6f6f6",
+    },
   },
   typography: {
     fontFamily:
