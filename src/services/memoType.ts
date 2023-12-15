@@ -3,6 +3,7 @@ export type Memo = {
   title: string;
   content: string;
   textColor: string;
+  tag: string;
   updatedAt: Date;
   createdAt: Date;
 };
