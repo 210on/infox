@@ -47,7 +47,7 @@ export function Memo(): JSX.Element {
       setCreatedAt(updatedAt);
     }
     try {
-      await saveMemo({ id, title, content, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
+      await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
       setMessageAtom((prev) => ({
         ...prev,
         ...successMessage("Saved"),
@@ -72,6 +72,7 @@ export function Memo(): JSX.Element {
         if (memo) {
           setTitle(memo.title);
           setContent(memo.content);
+          setTextColor(memo.textColor || 'black'); // textColor がない場合はデフォルト色を使用
         }
       } catch (e) {
         setMessageAtom((prev) => ({
