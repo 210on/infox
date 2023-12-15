@@ -1,8 +1,10 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { setUserToLocalStorage, signInWithGoogle } from "../utils/auth";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { userAtom } from "../states/userAtom";
 import { useNavigate } from "react-router-dom";
+import infoxLogoset from "/infox_logo_set.svg";
+
 
 export function Home(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -31,7 +33,12 @@ export function Home(): JSX.Element {
 
   return (
     <>
-      <Typography variant="h2">Infox</Typography>
+      <Grid container spacing={2} alignItems="center">
+        <Grid container item xs={6}>
+          <img src={infoxLogoset} />
+        </Grid>
+        <Grid container item xs={6}></Grid>
+      </Grid>
       <Typography variant="body1">
         <br />
         Infoxとは、シンプルなツールでスマートに知識を集積・体系化したい<br />
