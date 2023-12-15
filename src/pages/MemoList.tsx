@@ -37,6 +37,8 @@ export function MemoList(): JSX.Element {
   const [orderBy, setOrderBy] = useState("default");
   const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
   const [searchKeyword, setSearchKeyword] = useState<string>("");
+  const [originalMemoList, setOriginalMemoList] = useState<Memo[]>([]);
+  const [showNoResults, setShowNoResults] = useState(false); 
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -52,6 +54,7 @@ export function MemoList(): JSX.Element {
       if (_memoList) {
         setMemoList(_memoList);
         setDefaultOrder([..._memoList]); // Save default order
+        setOriginalMemoList([..._memoList]);
       }
     } catch (e) {
       setMessageAtom((prev) => ({
@@ -115,18 +118,23 @@ export function MemoList(): JSX.Element {
     setMemoList((prevList) => [...prevList].reverse());
   };
 
+  const NoResultsMessage = () => (
+    <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
+      No memos found. Try refining your search keywords.
+    </Typography>
+  );
   const searchMemos = (keyword: string) => {
     if (keyword.trim() === "") {
-      // 検索キーワードが空の場合はデフォルトのメモリストを表示
-      setMemoList([...defaultOrder]);
+      setMemoList([...originalMemoList]);
+      setShowNoResults(false); // 検索キーワードが空の場合はメッセージを非表示にする
     } else {
-      // メモリストからキーワードにマッチするものをフィルタリングして表示
-      const filteredMemos = memoList.filter(
+      const filteredMemos = originalMemoList.filter(
         (memo) =>
           memo.title.toLowerCase().includes(keyword.toLowerCase()) ||
           memo.content.toLowerCase().includes(keyword.toLowerCase())
       );
       setMemoList([...filteredMemos]);
+      setShowNoResults(filteredMemos.length === 0); // ヒット数が0件の場合にメッセージを表示
     }
   };
 
@@ -172,6 +180,7 @@ export function MemoList(): JSX.Element {
             
           </Box>
           
+
           <Box sx={{ marginTop: '20px' }}>
           <TextField
           label="Search memos"
@@ -187,7 +196,12 @@ export function MemoList(): JSX.Element {
             New memo
           </Button>
         </Box>
-
+        {memoList.length === 0 && showNoResults && <NoResultsMessage />}
+        {searchKeyword && memoList.length > 0  && (
+  <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
+    {`Found ${memoList.length} memo(s)`}
+  </Typography>
+)}
         {memoList.map((memo) => {
 
             //console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
