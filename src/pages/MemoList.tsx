@@ -98,9 +98,10 @@ export function MemoList(): JSX.Element {
     }
     if (selectedOrder === "date") {
       sortedList = [...memoList].sort((a, b) => {
-        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
-        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
-        return dateA.getTime() - dateB.getTime();
+        // 型アサーションを使用して Timestamp の seconds にアクセス
+        const secondsA = (a.createdAt as any).seconds;
+        const secondsB = (b.createdAt as any).seconds;
+        return secondsA - secondsB;
       });
     }
     if (reverseOrder) {
@@ -233,7 +234,7 @@ export function MemoList(): JSX.Element {
                 <>
                   <span>{memo.title}</span>
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    (Created: {formattedDateTime})
+                    (Created at: {formattedDateTime})
                   </span>
                 </>
               }

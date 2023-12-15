@@ -2,3 +2,12 @@
   max-width: 1280px;
   padding: 2rem;
 }
+
+/* 追加するスタイル */
+.fixedIconButton {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  margin: 16px !important;
+  z-index: 999 !important;
+}
