@@ -33,8 +33,8 @@ export function MemoList(): JSX.Element {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | undefined>();
   const navigate = useNavigate();
-  const [defaultOrder, setDefaultOrder] = useState<Memo[]>([]);
-  const [orderBy, setOrderBy] = useState("default");
+  const [updateOrder, setUpdateOrder] = useState<Memo[]>([]);
+  const [orderBy, setOrderBy] = useState("update");
   const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
   const [searchKeyword, setSearchKeyword] = useState<string>("");
 
@@ -51,7 +51,7 @@ export function MemoList(): JSX.Element {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
         setMemoList(_memoList);
-        setDefaultOrder([..._memoList]); // Save default order
+        setUpdateOrder([..._memoList]); // Save update order
       }
     } catch (e) {
       setMessageAtom((prev) => ({
@@ -73,7 +73,7 @@ export function MemoList(): JSX.Element {
         ...successMessage("Deleted"),
       }));
       setMemoList((prev) => prev.filter((memo) => memo.id !== id));
-      setDefaultOrder((prev) => prev.filter((memo) => memo.id !== id));
+      setUpdateOrder((prev) => prev.filter((memo) => memo.id !== id));
     } catch (e) {
       setMessageAtom((prev) => ({
         ...prev,
@@ -104,7 +104,7 @@ export function MemoList(): JSX.Element {
     if (reverseOrder) {
       sortedList.reverse(); // 逆順にする
     }
-    setMemoList(selectedOrder === "default" ? defaultOrder : sortedList);
+    setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
   };
 
   const handleNewMemo = () => {
@@ -119,7 +119,7 @@ export function MemoList(): JSX.Element {
   const searchMemos = (keyword: string) => {
     if (keyword.trim() === "") {
       // 検索キーワードが空の場合はデフォルトのメモリストを表示
-      setMemoList([...defaultOrder]);
+      setMemoList([...updateOrder]);
     } else {
       // メモリストからキーワードにマッチするものをフィルタリングして表示
       const filteredMemos = memoList.filter(
@@ -160,7 +160,7 @@ export function MemoList(): JSX.Element {
             Sort by:
           </Typography>
           <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
-            <MenuItem value="default">Default</MenuItem>
+            <MenuItem value="update">Update</MenuItem>
             <MenuItem value="title">Title</MenuItem>
             <MenuItem value="date">Date</MenuItem>
             {/* ここに他の並び替えオプションを追加 */}
@@ -192,9 +192,12 @@ export function MemoList(): JSX.Element {
         {memoList.map((memo) => {
 
             //console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
-            const timestamp = memo.createdAt as any;
-            const createdAtDate = new Date(timestamp.seconds * 1000);
-            const formattedDateTime = createdAtDate.toLocaleString();
+            const createdTimestamp = memo.createdAt as any;
+            const updatedTimestamp = memo.updatedAt as any;
+            const createdAtDate = new Date(createdTimestamp.seconds * 1000);
+            const updatedAtDate = new Date(updatedTimestamp.seconds * 1000);
+            const createdFormattedDateTime = createdAtDate.toLocaleString();
+            const updatedFormattedDateTime = updatedAtDate.toLocaleString();
             const truncateText = (text:string, maxLength:number) => {
               return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
             };
@@ -220,13 +223,23 @@ export function MemoList(): JSX.Element {
                 <>
                   <span>{memo.title}</span>
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    (Created at: {formattedDateTime})
+                    {orderBy === "date" ? (
+                      `(Created at: ${createdFormattedDateTime})`
+                    ) : (
+                      `(Updated at: ${updatedFormattedDateTime})`
+                    )}
                   </span>
                 </>
               }
               secondary={
                 <>
-                  <span>{truncateText(memo.content, 100)}</span>
+                  <span style={{
+                    wordWrap: 'break-word',
+                    width: '80%',
+                    display: 'inline-block' // インライン要素でも幅を適用させる
+                  }}>
+                    {truncateText(memo.content, 100)}
+                  </span>
                 </>
               }
               onClick={() => moveToMemo(memo.id)}
