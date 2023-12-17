@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import { Box, Button, Grid, MenuItem, Select, SelectChangeEvent,  TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { saveMemo } from "../services/saveMemo";
@@ -18,7 +18,6 @@ export function Memo(): JSX.Element {
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
-  const [textColor, setTextColor] = useState("black"); // デフォルトのテキスト色（黒色）を設定
   const [tag, setTag] = useState("");//タグの追加
 
   const params = useParams();
@@ -27,11 +26,6 @@ export function Memo(): JSX.Element {
 
   const navigate = useNavigate();
   const [createdAt, setCreatedAt] = useState<Date | null>(null);
-
-  // ドロップダウンで色が選択されたときに呼ばれる関数
-  const handleTextColorChange = (event: SelectChangeEvent<string>) => {
-    setTextColor(event.target.value); // 選択された色をセット
-  };
 
   const backToMemoList = () => {
     navigate("/memolist");
@@ -49,8 +43,8 @@ export function Memo(): JSX.Element {
     }
     if (memoCreatedAt) {
       try {
-        //await saveMemo({ id, title, content, textColor, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-        await saveMemo({ id, title, content, textColor, tag, updatedAt, createdAt: memoCreatedAt }, loginUser);
+        //await saveMemo({ id, title, content, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
+        await saveMemo({ id, title, content, tag, updatedAt, createdAt: memoCreatedAt }, loginUser);
         setMessageAtom((prev) => ({
           ...prev,
           ...successMessage("Saved"),
@@ -80,7 +74,6 @@ export function Memo(): JSX.Element {
         if (memo) {
           setTitle(memo.title);
           setContent(memo.content);
-          setTextColor(memo.textColor);
           setCreatedAt(memo.createdAt);
           setTag(memo.tag);
         }
@@ -128,22 +121,12 @@ export function Memo(): JSX.Element {
                     ['bold', 'strike'],
                     ['blockquote'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, 'clean']
+                    [{ 'color': [] }, 'clean'],
+                    ['link', 'image']
                   ]
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
-              {/* ドロップダウンメニュー */}
-              <Select value={textColor} onChange={handleTextColorChange}>
-                <MenuItem value="black">Black</MenuItem>
-                <MenuItem value="red">Red</MenuItem>
-                <MenuItem value="green">Green</MenuItem>
-                <MenuItem value="blue">Blue</MenuItem>
-                {/* 他の色の選択肢を追加できます */}
-              </Select>
-            </Grid>
-
               {/* タグ */}
             <Grid item xs={12}>
               <TextField
