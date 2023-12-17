@@ -112,7 +112,7 @@ export function Memo(): JSX.Element {
               />
             </Grid>
             <Grid item xs={12}>
-              <ReactQuill
+              <ReactQuill //リッチテキストエディタQuillに変更
                 value={content}
                 onChange={setContent}
                 modules={{
@@ -120,7 +120,7 @@ export function Memo(): JSX.Element {
                     [{ 'header': 1 }, { 'header': 2 }],
                     ['bold', 'strike'],
                     ['blockquote'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }, {'list': 'check'}],
                     [{ 'color': [] }, 'clean'],
                     ['link', 'image']
                   ]
