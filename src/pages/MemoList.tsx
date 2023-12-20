@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Grid,
   IconButton,
   ListItem,
   ListItemText,
@@ -12,17 +13,20 @@ import {
   Switch,
   FormControlLabel
 } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Delete } from "@mui/icons-material";
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
 import { Memo } from "../services/memoType";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { userAtom } from "../states/userAtom";
 import { useNavigate } from "react-router-dom";
-import { Delete } from "@mui/icons-material";
 import { deleteMemo } from "../services/deleteMemo";
 import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
+import infoxLogoset from "/infox_logo_typo.svg";
 
 
 
@@ -155,7 +159,12 @@ export function MemoList(): JSX.Element {
 
   return (
     <>
-      <Typography variant="h2">Infox</Typography>
+      <Grid container spacing={2} alignItems="center">
+        <Grid container item xs={6}>
+          <img src={infoxLogoset} />
+        </Grid>
+        <Grid container item xs={6}></Grid>
+      </Grid>
       <Box
         sx={{
           paddingTop: "40px",
@@ -163,44 +172,42 @@ export function MemoList(): JSX.Element {
         }}
       >
 
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          marginBottom="20px"
-        >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography variant="body1" sx={{ marginRight: "10px" }}>
-            Sort by:
-          </Typography>
-          <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
-            <MenuItem value="update">Update</MenuItem>
-            <MenuItem value="title">Title</MenuItem>
-            <MenuItem value="date">Date</MenuItem>
-            {/* ここに他の並び替えオプションを追加 */}
-          </Select>
-          <FormControlLabel
-            control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
-            label="Reverse"
-            labelPlacement="start"
-          />
-            
-          </Box>
-          
-
-          <Box sx={{ marginTop: '20px' }}>
-          <TextField
-          label="Search memos"
-          value={searchKeyword}
-          onChange={handleSearchInputChange}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom="20px"
+      >
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography variant="body1" sx={{ marginRight: "10px" }}>
+          Sort by:
+        </Typography>
+        <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
+          <MenuItem value="update">Update</MenuItem>
+          <MenuItem value="title">Title</MenuItem>
+          <MenuItem value="date">Date</MenuItem>
+          {/* ここに他の並び替えオプションを追加 */}
+        </Select>
+        <FormControlLabel
+          control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
+          label="Reverse"
+          labelPlacement="start"
         />
-        <Button variant="contained" onClick={handleSearch}>
-          Search
-        </Button>
+      </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <TextField
+            label="Search memos"
+            value={searchKeyword}
+            onChange={handleSearchInputChange}
+          />
+          <Button variant="contained" onClick={handleSearch}>
+            <SearchIcon/>
+          </Button>
         </Box>
 
           <Button variant="contained" onClick={handleNewMemo}>
-            New memo
+            <AddCircleIcon/>New memo
           </Button>
         </Box>
         {memoList.length === 0 && showNoResults && <NoResultsMessage />}
@@ -254,7 +261,6 @@ export function MemoList(): JSX.Element {
                     "#" + truncateText(memo.tag, 100)
                       )
                     }
-                    
                   </span>
                 </>
               }
@@ -269,7 +275,6 @@ export function MemoList(): JSX.Element {
                   </span>
                 </>
               }
-              
               onClick={() => moveToMemo(memo.id)}
             />
           </ListItem>
