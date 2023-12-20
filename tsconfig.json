@@ -8,7 +8,7 @@
     "types": [ "node", "jest", "@testing-library/jest-dom", "vite-plugin-svgr/client"],
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
