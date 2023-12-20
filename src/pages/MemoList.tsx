@@ -39,6 +39,7 @@ export function MemoList(): JSX.Element {
   const [searchKeyword, setSearchKeyword] = useState<string>("");
   const [originalMemoList, setOriginalMemoList] = useState<Memo[]>([]);
   const [showNoResults, setShowNoResults] = useState(false); 
+  const [showResults,setShowResults] = useState(false);
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -130,6 +131,7 @@ export function MemoList(): JSX.Element {
       setMemoList([...updateOrder]);
       setMemoList([...originalMemoList]);
       setShowNoResults(false); // 検索キーワードが空の場合はメッセージを非表示にする
+      setShowResults(false);
     } else {
       const filteredMemos = originalMemoList.filter(
         (memo) =>
@@ -138,6 +140,7 @@ export function MemoList(): JSX.Element {
           memo.tag.toLowerCase().includes(keyword.toLowerCase())
       );
       setMemoList([...filteredMemos]);
+      setShowResults(filteredMemos.length !== 0);
       setShowNoResults(filteredMemos.length === 0); // ヒット数が0件の場合にメッセージを表示
     }
   };
@@ -201,7 +204,7 @@ export function MemoList(): JSX.Element {
           </Button>
         </Box>
         {memoList.length === 0 && showNoResults && <NoResultsMessage />}
-        {searchKeyword && memoList.length > 0  && (
+        {searchKeyword &&showResults &&memoList.length > 0  && (
   <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
     {`Found ${memoList.length} memo(s)`}
   </Typography>
