@@ -250,7 +250,11 @@ export function MemoList(): JSX.Element {
                     )}
                   </span>
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    {"#" + truncateText(memo.tag, 100)}
+                    {memo.tag && (
+                    "#" + truncateText(memo.tag, 100)
+                      )
+                    }
+                    
                   </span>
                 </>
               }
