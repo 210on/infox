@@ -1,4 +1,3 @@
-import ReactMarkdown from 'react-markdown';
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
@@ -10,6 +9,7 @@ import { searchMemoById } from "../services/searchMemo";
 import { exceptionMessage, successMessage } from "../utils/messages";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './toolbar.css';
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -112,7 +112,11 @@ export function Memo(): JSX.Element {
               />
             </Grid>
             <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Content
+              </Typography>
               <ReactQuill //リッチテキストエディタQuillに変更
+                className="react-quill-toolbar"
                 value={content}
                 onChange={setContent}
                 modules={{
@@ -152,17 +156,6 @@ export function Memo(): JSX.Element {
             </Grid>
           </Grid>
         </Box>
-      </Box>
-      <Box sx={{ flex: 1, paddingLeft: "16px", marginTop: "110px" }}>
-        {/* 右側の表示部分 */}
-        <Grid container spacing={2} sx={{ width: "100%" }}>
-          <Grid item xs={12}>
-            <Typography variant="h3">{title}</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <ReactMarkdown>{content}</ReactMarkdown>
-          </Grid>
-        </Grid>
       </Box>
     </Box>
     </>
