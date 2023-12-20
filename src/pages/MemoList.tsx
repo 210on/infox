@@ -132,7 +132,8 @@ export function MemoList(): JSX.Element {
       const filteredMemos = originalMemoList.filter(
         (memo) =>
           memo.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          memo.content.toLowerCase().includes(keyword.toLowerCase())
+          memo.content.toLowerCase().includes(keyword.toLowerCase())||
+          memo.tag.toLowerCase().includes(keyword.toLowerCase())
       );
       setMemoList([...filteredMemos]);
       setShowNoResults(filteredMemos.length === 0); // ヒット数が0件の場合にメッセージを表示
