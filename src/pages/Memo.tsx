@@ -21,11 +21,10 @@ export function Memo(): JSX.Element {
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
-  const [tag, setTag] = useState("");//タグの追加
 
   
   // タグ関連の状態とイベントハンドラー
-  const [tags, setTags] = useState([
+  const [tags, setTags] = useState<Tag[]>([
     { id: '1', text: 'タグなし' }
   ]);
 
@@ -73,10 +72,7 @@ export function Memo(): JSX.Element {
     if (memoCreatedAt) {
       try {
         //await saveMemo({ id, title, content, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-        // タグ配列の各要素から text プロパティを抽出し、それをスペース区切りの文字列に結合
-        const tagsString = tags.map(tag => tag.text).join(' ');
-        //await saveMemo({ id, title, content, tag, tags: tagsString, updatedAt, createdAt: memoCreatedAt }, loginUser);
-        await saveMemo({ id, title, content, tags: tagsString, updatedAt, createdAt: memoCreatedAt }, loginUser);
+        await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt }, loginUser);
         
         setMessageAtom((prev) => ({
           ...prev,
@@ -108,8 +104,7 @@ export function Memo(): JSX.Element {
           setTitle(memo.title);
           setContent(memo.content);
           setCreatedAt(memo.createdAt);
-          //setTag(memo.tag);
-          setTag(memo.tags);
+          setTags(memo.tags);
         }
       } catch (e) {
         setMessageAtom((prev) => ({
@@ -165,21 +160,13 @@ export function Memo(): JSX.Element {
                 }}
               />
             </Grid>
-              {/* タグ */}
-            <Grid item xs={12}>
-              <TextField
-                  label="Tag"
-                  variant="outlined"
-                  fullWidth
-                  value={tag}
-                  onChange={(e) => setTag(e.target.value)}
-              />
-            </Grid>
 
             {/* ReactTags コンポーネントの配置 */}
+            
       <Grid item xs={12}>
         <ReactTags
-          tags={tags}
+          tags={Array.isArray(tags) ? tags : []}
+          //tags={tags}
           handleDelete={handleDelete}
           handleAddition={handleAddition}
           handleDrag={handleDrag}

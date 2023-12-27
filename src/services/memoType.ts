@@ -3,7 +3,12 @@ export type Memo = {
   title: string;
   content: string;
   //tag: string;
-  tags: string;
+  tags: Tag[];
   updatedAt: Date;
   createdAt: Date;
+};
+
+export type Tag = {
+  id: string;
+  text: string;
 };

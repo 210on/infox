@@ -141,7 +141,7 @@ export function MemoList(): JSX.Element {
         (memo) =>
           memo.title.toLowerCase().includes(keyword.toLowerCase()) ||
           memo.content.toLowerCase().includes(keyword.toLowerCase())||
-          memo.tag.toLowerCase().includes(keyword.toLowerCase())
+          memo.tags.some(tag => tag.text.toLowerCase().includes(keyword.toLowerCase()))
       );
       setMemoList([...filteredMemos]);
       setShowResults(filteredMemos.length !== 0);
@@ -257,10 +257,9 @@ export function MemoList(): JSX.Element {
                     )}
                   </span>
                   <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    {memo.tag && (
-                    "#" + truncateText(memo.tag, 100)
-                      )
-                    }
+                  {memo.tags && memo.tags.length > 0 
+                    ? "#" + memo.tags.map(tag => tag.text).join(', ')
+                    : ''}
                   </span>
                 </>
               }
