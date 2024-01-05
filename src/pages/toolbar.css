@@ -3,6 +3,7 @@
 	right: 0;
 	width: 60px;
 	z-index: 1000;
+	border-radius: 5px;
 	background-color: #f4d6d6;
 }
 
@@ -11,8 +12,8 @@
 }
 
 .react-quill-toolbar .ql-toolbar button{
-  height: 40px;
-  line-height: 20px; 
+	height: 40px;
+	line-height: 20px;
 }
 
 .react-quill-toolbar .ql-toolbar .ql-picker {

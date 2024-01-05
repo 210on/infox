@@ -3,6 +3,7 @@
 import React from "react";
 import { Drawer, List, ListItem, ListItemText, Divider, Button, Typography } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import ListIcon from '@mui/icons-material/List';
 import { Link } from "react-router-dom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { userAtom } from "../states/userAtom";
@@ -57,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 				</Button>
 			</ListItem>
 			<ListItem component={Link} to="/memolist">
+        <ListIcon/>
 				<ListItemText primary="メモリスト" />
 			</ListItem>
 			<Divider />

@@ -15,6 +15,8 @@ import {
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
+import InputAdornment from '@mui/material/InputAdornment';
 import { Delete } from "@mui/icons-material";
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
@@ -160,10 +162,10 @@ export function MemoList(): JSX.Element {
   return (
     <>
       <Grid container spacing={2} alignItems="center">
-        <Grid container item xs={6}>
+        <Grid container item xs={3}>
           <img src={infoxLogoset} />
         </Grid>
-        <Grid container item xs={6}></Grid>
+        <Grid container item xs={9}></Grid>
       </Grid>
       <Box
         sx={{
@@ -193,6 +195,7 @@ export function MemoList(): JSX.Element {
           label="Reverse"
           labelPlacement="start"
         />
+        <SwapVerticalCircleIcon />
       </Box>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -200,14 +203,20 @@ export function MemoList(): JSX.Element {
             label="Search memos"
             value={searchKeyword}
             onChange={handleSearchInputChange}
+            InputProps={{
+              startAdornment: (
+                  <InputAdornment position="start">
+                      <SearchIcon />
+                  </InputAdornment>
+              ),
+          }}
           />
           <Button variant="contained" onClick={handleSearch}>
             <SearchIcon/>
           </Button>
         </Box>
-
           <Button variant="contained" onClick={handleNewMemo}>
-            <AddCircleIcon/>New memo
+            <AddCircleIcon/>&nbsp;New memo
           </Button>
         </Box>
         {memoList.length === 0 && showNoResults && <NoResultsMessage />}
