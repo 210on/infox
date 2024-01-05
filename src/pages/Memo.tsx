@@ -10,7 +10,7 @@ import { exceptionMessage, successMessage } from "../utils/messages";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './toolbar.css';
-import React, { useEffect, useState } from 'react';//suzu
+import { useEffect, useState } from 'react';//suzu
 import { WithContext as ReactTags } from 'react-tag-input';//suzu
 
 
