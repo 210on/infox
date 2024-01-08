@@ -1,22 +1,36 @@
 import {
   Box,
   Button,
+  Grid,
   IconButton,
   ListItem,
   ListItemText,
   Typography,
+  TextField,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Switch,
+  FormControlLabel
 } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
+import InputAdornment from '@mui/material/InputAdornment';
+import { Delete } from "@mui/icons-material";
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
 import { Memo } from "../services/memoType";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { userAtom } from "../states/userAtom";
 import { useNavigate } from "react-router-dom";
-import { Delete } from "@mui/icons-material";
 import { deleteMemo } from "../services/deleteMemo";
 import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
+import infoxLogoset from "/infox_logo_typo.svg";
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -25,6 +39,14 @@ export function MemoList(): JSX.Element {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedMemoId, setSelectedMemoId] = useState<string | undefined>();
   const navigate = useNavigate();
+  const [updateOrder, setUpdateOrder] = useState<Memo[]>([]);
+  const [orderBy, setOrderBy] = useState("update");
+  const [reverseOrder, setReverseOrder] = useState(false); // 逆順フラグ
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
+  const [originalMemoList, setOriginalMemoList] = useState<Memo[]>([]);
+  const [showNoResults, setShowNoResults] = useState(false); 
+  const [showResults,setShowResults] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -39,16 +61,16 @@ export function MemoList(): JSX.Element {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
         setMemoList(_memoList);
+        setUpdateOrder([..._memoList]); // Save update order
+        setOriginalMemoList([..._memoList]);
       }
     } catch (e) {
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...exceptionMessage(),
-        };
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...exceptionMessage(),
+      }));
     }
-  }, [loginUser, setMemoList, setMessageAtom]);
+  }, [loginUser, setMessageAtom]);
 
   const onClickDelete = async (id?: string) => {
     if (!id) {
@@ -57,22 +79,17 @@ export function MemoList(): JSX.Element {
 
     try {
       await deleteMemo(id, loginUser);
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...successMessage("Deleted"),
-        };
-      });
-      setMemoList((prev) => {
-        return prev.filter((memo) => memo.id !== id);
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...successMessage("Deleted"),
+      }));
+      setMemoList((prev) => prev.filter((memo) => memo.id !== id));
+      setUpdateOrder((prev) => prev.filter((memo) => memo.id !== id));
     } catch (e) {
-      setMessageAtom((prev) => {
-        return {
-          ...prev,
-          ...exceptionMessage(),
-        };
-      });
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...exceptionMessage(),
+      }));
     }
   };
 
@@ -80,47 +97,232 @@ export function MemoList(): JSX.Element {
     getMemoList();
   }, [loginUser, getMemoList]);
 
+  const handleSortChange = (event: SelectChangeEvent<string>) => {
+    if (isDragging) return;  // ドラッグ中はソートを実行しない
+      const selectedOrder = event.target.value as string;
+      setOrderBy(selectedOrder);
+      let sortedList = [...memoList];
+      if (selectedOrder === "title") {
+        sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
+      }
+      if (selectedOrder === "date") {
+        sortedList = [...memoList].sort((a, b) => {
+          // 型アサーションを使用して Timestamp の seconds にアクセス
+          const secondsA = (a.createdAt as any).seconds;
+          const secondsB = (b.createdAt as any).seconds;
+          return secondsA - secondsB;
+        });
+      }
+      if (reverseOrder) {
+        sortedList.reverse(); // 逆順にする
+      }
+      setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
+  };
+
+  const handleNewMemo = () => {
+    moveToMemo();
+  };
+
+  const handleReverseToggle = () => {
+    setReverseOrder(!reverseOrder);
+    setMemoList((prevList) => [...prevList].reverse());
+  };
+
+  const NoResultsMessage = () => (
+    <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
+      No memos found. Try refining your search keywords.
+    </Typography>
+  );
+  const searchMemos = (keyword: string) => {
+    if (keyword.trim() === "") {
+      // 検索キーワードが空の場合はデフォルトのメモリストを表示
+      setMemoList([...updateOrder]);
+      setMemoList([...originalMemoList]);
+      setShowNoResults(false); // 検索キーワードが空の場合はメッセージを非表示にする
+      setShowResults(false);
+    } else {
+      const filteredMemos = originalMemoList.filter(
+        (memo) =>
+          memo.title.toLowerCase().includes(keyword.toLowerCase()) ||
+          memo.content.toLowerCase().includes(keyword.toLowerCase())||
+          memo.tags.some(tag => tag.text.toLowerCase().includes(keyword.toLowerCase()))
+      );
+      setMemoList([...filteredMemos]);
+      setShowResults(filteredMemos.length !== 0);
+      setShowNoResults(filteredMemos.length === 0); // ヒット数が0件の場合にメッセージを表示
+    }
+  };
+
+  const handleSearch = () => {
+    searchMemos(searchKeyword);
+  };
+
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(event.target.value);
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    setIsDragging(false);
+    if (!result.destination) return;
+
+    const items = Array.from(memoList);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setMemoList(items);
+  };
+
+
   return (
     <>
-      <Typography variant="h2">Memo</Typography>
+      <Grid container spacing={2} alignItems="center">
+        <Grid container item xs={3}>
+          <img src={infoxLogoset} />
+        </Grid>
+        <Grid container item xs={9}></Grid>
+      </Grid>
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <Droppable droppableId="droppableMemos">
+          {(provided) => (
+            <Box
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            sx={{
+              paddingTop: "40px",
+              paddingBottom: "40px",
+            }}
+            >
+
       <Box
-        sx={{
-          paddingTop: "40px",
-          paddingBottom: "40px",
-        }}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom="20px"
       >
-        <Box display="flex" justifyContent="flex-end">
-          <Button variant="contained" onClick={() => moveToMemo()}>
-            New memo
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography variant="body1" sx={{ marginRight: "10px" }}>
+          Sort by:
+        </Typography>
+        <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' }}>
+          <MenuItem value="update">Update</MenuItem>
+          <MenuItem value="title">Title</MenuItem>
+          <MenuItem value="date">Date</MenuItem>
+          {/* ここに他の並び替えオプションを追加 */}
+        </Select>
+        <FormControlLabel
+          control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
+          label="Reverse"
+          labelPlacement="start"
+        />
+        <SwapVerticalCircleIcon />
+      </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <TextField
+            label="Search memos"
+            value={searchKeyword}
+            onChange={handleSearchInputChange}
+            InputProps={{
+              startAdornment: (
+                  <InputAdornment position="start">
+                      <SearchIcon />
+                  </InputAdornment>
+              ),
+          }}
+          />
+          <Button variant="contained" onClick={handleSearch}>
+            <SearchIcon/>
           </Button>
         </Box>
-        {memoList.map((memo) => {
-          return (
-            <ListItem
-              alignItems="flex-start"
-              key={memo.id}
-              sx={{ cursor: "pointer" }}
-              secondaryAction={
-                <IconButton
-                  aria-label="delete"
-                  onClick={() => {
-                    setSelectedMemoId(memo.id);
-                    setOpenDialog(true);
-                  }}
+          <Button variant="contained" onClick={handleNewMemo}>
+            <AddCircleIcon/>&nbsp;New memo
+          </Button>
+        </Box>
+        {memoList.length === 0 && showNoResults && <NoResultsMessage />}
+        {searchKeyword &&showResults &&memoList.length > 0  && (
+        <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
+          {`Found ${memoList.length} memo(s)`}
+        </Typography>
+      )}
+      {memoList.map((memo, index) => {
+        const createdTimestamp = memo.createdAt as any;
+        const updatedTimestamp = memo.updatedAt as any;
+        const createdAtDate = new Date(createdTimestamp.seconds * 1000);
+        const updatedAtDate = new Date(updatedTimestamp.seconds * 1000);
+        const createdFormattedDateTime = createdAtDate.toLocaleString();
+        const updatedFormattedDateTime = updatedAtDate.toLocaleString();
+        const truncateText = (text:string, maxLength:number) => {
+          return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        };
+
+        return (
+          <Draggable key={memo.id} draggableId={memo.id!} index={index}>
+            {(provided) => (
+              <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              >
+                <ListItem
+                  key={memo.id}
+                  sx={{ cursor: "pointer" }}
+                  secondaryAction={
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => {
+                        setSelectedMemoId(memo.id);
+                        setOpenDialog(true);
+                      }}
+                    >
+                    <Delete />
+                    </IconButton>
+                  }
                 >
-                  <Delete />
-                </IconButton>
-              }
-            >
-              <ListItemText
-                primary={memo.title}
-                secondary={memo.content}
-                onClick={() => moveToMemo(memo.id)}
-              />
-            </ListItem>
-          );
-        })}
+                  <ListItemText
+                    primary={
+                      <>
+                        <span>{memo.title}</span>
+                        <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                          {orderBy === "date" ? (
+                            `(Created at: ${createdFormattedDateTime})`
+                          ) : (
+                            `(Updated at: ${updatedFormattedDateTime})`
+                          )}
+                        </span>
+                        <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                        {memo.tags && memo.tags.length > 0 
+                        ? "#" + memo.tags.map(tag => tag.text).join(', ')
+                        : ''}
+                        </span>
+                      </>
+                    }
+                    secondary={
+                      <>
+                        <span style={{
+                          wordWrap: 'break-word',
+                          width: '80%',
+                          display: 'inline-block' // インライン要素でも幅を適用させる
+                        }}>
+                          {truncateText(memo.content, 100)}
+                        </span>
+                      </>
+                    }
+                  onClick={() => moveToMemo(memo.id)}
+                  />
+                </ListItem>
+              </div>
+            )}
+            </Draggable>
+        )})}
+      {provided.placeholder}
       </Box>
+      )}
+      </Droppable>
+      </DragDropContext>
       <SimpleDialog
         open={openDialog}
         handleClose={() => setOpenDialog(false)}

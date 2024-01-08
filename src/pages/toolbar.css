@@ -1,0 +1,28 @@
+.react-quill-toolbar .ql-toolbar {
+	position: fixed;
+	right: 0;
+	width: 60px;
+	z-index: 1000;
+	border-radius: 5px;
+	background-color: #f4d6d6;
+}
+
+.react-quill-toolbar .ql-editor {
+	border-top: 1px solid #d3d3d3; /* 上部の枠線を再度追加 */
+}
+
+.react-quill-toolbar .ql-toolbar button{
+	height: 40px;
+	line-height: 20px;
+}
+
+.react-quill-toolbar .ql-toolbar .ql-picker {
+	height: 40px;
+	width: 40px;
+}
+
+.react-quill-toolbar .ql-color-picker .ql-picker-options {
+	position: absolute;
+	right: 0; /* または必要に応じて調整 */
+	z-index: 1001; /* ツールバーよりも上に表示されるように */
+}
