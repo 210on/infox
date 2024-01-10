@@ -6,6 +6,8 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "types": [ "node", "jest", "@testing-library/jest-dom", "vite-plugin-svgr/client"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
 
     /* Bundler mode */
     "moduleResolution": "node",

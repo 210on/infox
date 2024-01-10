@@ -10,6 +10,7 @@ import Sidebar from "./pages/Sidebar";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton } from "@mui/material";
 import { useState } from "react";
+import { ViewMemo } from "./services/ViewMemo";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/memolist" element={<MemoList />} />
             <Route path="/memo/:id?" element={<Memo />} />
+            <Route path="/view/:id" element={<ViewMemo />} />
           </Routes>
         </div>
         <IconButton className="fixedIconButton" onClick={handleSidebarOpen}>

@@ -1,0 +1,15 @@
+ul[data-checked="true"] li::before {
+	content: '✔'; /* チェックマーク */
+	color: green; /* 色を緑に */
+	margin-right: 0.5em; /* 右にマージンを設定 */
+  }
+  
+  ul[data-checked="false"] li::before {
+	content: '✘'; /* バツマーク */
+	color: red; /* 色を赤に */
+	margin-right: 0.5em; /* 右にマージンを設定 */
+  }
+  
+ 
+  
+  
