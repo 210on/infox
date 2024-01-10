@@ -29,12 +29,8 @@ import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
 import infoxLogoset from "/infox_logo_typo.svg";
-<<<<<<< HEAD
-import VisibilityIcon from '@mui/icons-material/Visibility';
-=======
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
->>>>>>> origin/dev
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -283,78 +279,6 @@ export function MemoList(): JSX.Element {
           return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
         };
 
-<<<<<<< HEAD
-            //console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
-            const createdTimestamp = memo.createdAt as any;
-            const updatedTimestamp = memo.updatedAt as any;
-            const createdAtDate = new Date(createdTimestamp.seconds * 1000);
-            const updatedAtDate = new Date(updatedTimestamp.seconds * 1000);
-            const createdFormattedDateTime = createdAtDate.toLocaleString();
-            const updatedFormattedDateTime = updatedAtDate.toLocaleString();
-            const truncateText = (text:string, maxLength:number) => {
-              return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-            };
-
-            return (
-          <ListItem
-            key={memo.id}
-            sx={{ cursor: "pointer" }}
-            secondaryAction={
-              <>
-                {/* 新しい閲覧アイコンボタン */}
-                <IconButton
-                  aria-label="view"
-                  onClick={() => memo.id && navigate(`/view/${memo.id}`)}
-                >
-                  <VisibilityIcon />
-                </IconButton>
-                <IconButton
-                  aria-label="delete"
-                  onClick={() => {
-                    setSelectedMemoId(memo.id);
-                    setOpenDialog(true);
-                  }}
-                >
-                  <Delete />
-                </IconButton>
-              </>
-            }
-          >
-            <ListItemText
-              primary={
-                <>
-                  <span>{memo.title}</span>
-                  <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                    {orderBy === "date" ? (
-                      `(Created at: ${createdFormattedDateTime})`
-                    ) : (
-                      `(Updated at: ${updatedFormattedDateTime})`
-                    )}
-                  </span>
-                  <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
-                  {memo.tags && memo.tags.length > 0 
-                    ? "#" + memo.tags.map(tag => tag.text).join(', ')
-                    : ''}
-                  </span>
-                </>
-              }
-              secondary={
-                <>
-                  <span style={{
-                    wordWrap: 'break-word',
-                    width: '80%',
-                    display: 'inline-block' // インライン要素でも幅を適用させる
-                  }}>
-                    {truncateText(memo.content, 100)}
-                  </span>
-                </>
-              }
-              onClick={() => moveToMemo(memo.id)}
-            />
-          </ListItem>
-        );})}
-      </Box>      
-=======
         return (
           <Draggable key={memo.id} draggableId={memo.id!} index={index}>
             {(provided) => (
@@ -419,7 +343,6 @@ export function MemoList(): JSX.Element {
       )}
       </Droppable>
       </DragDropContext>
->>>>>>> origin/dev
       <SimpleDialog
         open={openDialog}
         handleClose={() => setOpenDialog(false)}
