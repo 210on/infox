@@ -29,7 +29,12 @@ import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
 import infoxLogoset from "/infox_logo_typo.svg";
+<<<<<<< HEAD
 import VisibilityIcon from '@mui/icons-material/Visibility';
+=======
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+
+>>>>>>> origin/dev
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -45,6 +50,14 @@ export function MemoList(): JSX.Element {
   const [originalMemoList, setOriginalMemoList] = useState<Memo[]>([]);
   const [showNoResults, setShowNoResults] = useState(false); 
   const [showResults,setShowResults] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [savedOrder, setSavedOrder] = useState<Memo[]>([]);
+
+  const handleSaveOrder = () => {
+    setSavedOrder([...memoList]);
+    // ここでバックエンドに保存するロジックを追加することができます
+  };
+  //これが消えるまでなら戻してよい
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -96,24 +109,34 @@ export function MemoList(): JSX.Element {
   }, [loginUser, getMemoList]);
 
   const handleSortChange = (event: SelectChangeEvent<string>) => {
-    const selectedOrder = event.target.value as string;
-    setOrderBy(selectedOrder);
-    let sortedList = [...memoList];
-    if (selectedOrder === "title") {
-      sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
-    }
-    if (selectedOrder === "date") {
-      sortedList = [...memoList].sort((a, b) => {
-        // 型アサーションを使用して Timestamp の seconds にアクセス
-        const secondsA = (a.createdAt as any).seconds;
-        const secondsB = (b.createdAt as any).seconds;
-        return secondsA - secondsB;
-      });
-    }
-    if (reverseOrder) {
-      sortedList.reverse(); // 逆順にする
-    }
-    setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
+    if (isDragging) return;  // ドラッグ中はソートを実行しない
+      const selectedOrder = event.target.value as string;
+      setOrderBy(selectedOrder);
+      let sortedList = [...memoList];
+      if (selectedOrder === "title") {
+        sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
+      }
+      if (selectedOrder === "date") {
+        sortedList = [...memoList].sort((a, b) => {
+          // 型アサーションを使用して Timestamp の seconds にアクセス
+          const secondsA = (a.createdAt as any).seconds;
+          const secondsB = (b.createdAt as any).seconds;
+          return secondsA - secondsB;
+        });
+      }
+      if (reverseOrder) {
+        sortedList.reverse(); // 逆順にする
+      }
+      if (selectedOrder === "custom") {
+        const savedMemos = savedOrder;
+        const unsavedMemos = memoList.filter(
+          memo => !savedMemos.find(savedMemo => savedMemo.id === memo.id)
+        );
+    
+        // 未保存のメモをリストの上部に配置
+        sortedList = [...unsavedMemos, ...savedMemos];
+      }
+      setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
   };
 
   const handleNewMemo = () => {
@@ -158,6 +181,22 @@ export function MemoList(): JSX.Element {
     setSearchKeyword(event.target.value);
   };
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    setIsDragging(false);
+    if (!result.destination) return;
+
+    const items = Array.from(memoList);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setMemoList(items);
+  };
+
+
   return (
     <>
       <Grid container spacing={2} alignItems="center">
@@ -166,12 +205,17 @@ export function MemoList(): JSX.Element {
         </Grid>
         <Grid container item xs={9}></Grid>
       </Grid>
-      <Box
-        sx={{
-          paddingTop: "40px",
-          paddingBottom: "40px",
-        }}
-      >
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <Droppable droppableId="droppableMemos">
+          {(provided) => (
+            <Box
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            sx={{
+              paddingTop: "40px",
+              paddingBottom: "40px",
+            }}
+            >
 
       <Box
         display="flex"
@@ -183,10 +227,11 @@ export function MemoList(): JSX.Element {
         <Typography variant="body1" sx={{ marginRight: "10px" }}>
           Sort by:
         </Typography>
-        <Select value={orderBy} onChange={handleSortChange} sx={{ minWidth: '110px' }}>
+        <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' }}>
           <MenuItem value="update">Update</MenuItem>
           <MenuItem value="title">Title</MenuItem>
           <MenuItem value="date">Date</MenuItem>
+          <MenuItem value="custom">Custom</MenuItem>
           {/* ここに他の並び替えオプションを追加 */}
         </Select>
         <FormControlLabel
@@ -196,6 +241,9 @@ export function MemoList(): JSX.Element {
         />
         <SwapVerticalCircleIcon />
       </Box>
+      <Button variant="contained" onClick={handleSaveOrder}>
+        Save
+      </Button>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <TextField
@@ -220,12 +268,22 @@ export function MemoList(): JSX.Element {
         </Box>
         {memoList.length === 0 && showNoResults && <NoResultsMessage />}
         {searchKeyword &&showResults &&memoList.length > 0  && (
-  <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
-    {`Found ${memoList.length} memo(s)`}
-  </Typography>
-)}
-        {memoList.map((memo) => {
+        <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
+          {`Found ${memoList.length} memo(s)`}
+        </Typography>
+      )}
+      {memoList.map((memo, index) => {
+        const createdTimestamp = memo.createdAt as any;
+        const updatedTimestamp = memo.updatedAt as any;
+        const createdAtDate = new Date(createdTimestamp.seconds * 1000);
+        const updatedAtDate = new Date(updatedTimestamp.seconds * 1000);
+        const createdFormattedDateTime = createdAtDate.toLocaleString();
+        const updatedFormattedDateTime = updatedAtDate.toLocaleString();
+        const truncateText = (text:string, maxLength:number) => {
+          return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        };
 
+<<<<<<< HEAD
             //console.log(typeof memo.createdAt, memo.createdAt);// ここで createdAt の値をコンソールに出力
             const createdTimestamp = memo.createdAt as any;
             const updatedTimestamp = memo.updatedAt as any;
@@ -296,6 +354,72 @@ export function MemoList(): JSX.Element {
           </ListItem>
         );})}
       </Box>      
+=======
+        return (
+          <Draggable key={memo.id} draggableId={memo.id!} index={index}>
+            {(provided) => (
+              <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              >
+                <ListItem
+                  key={memo.id}
+                  sx={{ cursor: "pointer" }}
+                  secondaryAction={
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => {
+                        setSelectedMemoId(memo.id);
+                        setOpenDialog(true);
+                      }}
+                    >
+                    <Delete />
+                    </IconButton>
+                  }
+                >
+                  <ListItemText
+                    primary={
+                      <>
+                        <span>{memo.title}</span>
+                        <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                          {orderBy === "date" ? (
+                            `(Created at: ${createdFormattedDateTime})`
+                          ) : (
+                            `(Updated at: ${updatedFormattedDateTime})`
+                          )}
+                        </span>
+                        <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+                        {memo.tags && memo.tags.length > 0 
+                        ? "#" + memo.tags.map(tag => tag.text).join(', ')
+                        : ''}
+                        </span>
+                      </>
+                    }
+                    secondary={
+                      <>
+                        <span style={{
+                          wordWrap: 'break-word',
+                          width: '80%',
+                          display: 'inline-block' // インライン要素でも幅を適用させる
+                        }}>
+                          {truncateText(memo.content, 100)}
+                        </span>
+                      </>
+                    }
+                  onClick={() => moveToMemo(memo.id)}
+                  />
+                </ListItem>
+              </div>
+            )}
+            </Draggable>
+        )})}
+      {provided.placeholder}
+      </Box>
+      )}
+      </Droppable>
+      </DragDropContext>
+>>>>>>> origin/dev
       <SimpleDialog
         open={openDialog}
         handleClose={() => setOpenDialog(false)}
