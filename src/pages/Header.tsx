@@ -17,6 +17,7 @@ export function Header(): JSX.Element {
       return {
         userId: null,
         userName: null,
+        apiKey: null,
       };
     });
     clearUserInLocalStorage();

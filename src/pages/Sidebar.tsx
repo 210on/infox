@@ -30,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     setUserAtom({
       userId: null,
       userName: null,
+      apiKey: null,
     });
     clearUserInLocalStorage();
     navigate("/");
@@ -66,6 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <AddCircleIcon />
 				<ListItemText primary="新しいメモ" />
 			</ListItem>
+      <ListItem component={Link} to="/api-key">
+        <AddCircleIcon />
+				<ListItemText primary="API Keyを登録する" />
+			</ListItem>
 			</>
 		) : (
 			<>
@@ -77,7 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 				アプリの機能を利用するにはサインインしてください。
 				</Typography>
 			</ListItem>
-			{/* 他のヘルプメニューアイテムを追加する場合はここに追加 */}
 			</>
 		)}
 		</List>
