@@ -2,7 +2,6 @@ import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { userAtom } from "../states/userAtom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { saveMemo } from "../services/saveMemo";
-
 import { messageAtom } from "../states/messageAtom";
 import { useNavigate, useParams } from "react-router-dom";
 import { searchMemoById } from "../services/searchMemo";
@@ -117,8 +116,6 @@ export function Memo(): JSX.Element {
     get();
   }, [id, loginUser, setMessageAtom]);
 
-
-
   return (
     <>
     <Box sx={{ display: "flex" }}>
@@ -144,7 +141,7 @@ export function Memo(): JSX.Element {
               <Typography variant="subtitle1" gutterBottom>
                 Content
               </Typography>
-              <ReactQuill //リッチテキストエディタQuillに変更
+              <ReactQuill //TextFieldからリッチテキストエディタQuillに変更
                 className="react-quill-toolbar"
                 value={content}
                 onChange={setContent}

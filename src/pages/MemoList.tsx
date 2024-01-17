@@ -31,7 +31,7 @@ import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
 import infoxLogoset from "/infox_logo_typo.svg";
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -292,15 +292,24 @@ export function MemoList(): JSX.Element {
                   key={memo.id}
                   sx={{ cursor: "pointer" }}
                   secondaryAction={
-                    <IconButton
-                      aria-label="delete"
-                      onClick={() => {
-                        setSelectedMemoId(memo.id);
-                        setOpenDialog(true);
-                      }}
-                    >
-                    <Delete />
-                    </IconButton>
+                    <>
+                      {/* 新しい閲覧アイコンボタン */}
+                      <IconButton
+                        aria-label="view"
+                        onClick={() => memo.id && navigate(`/view/${memo.id}`)}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                      <IconButton
+                        aria-label="delete"
+                        onClick={() => {
+                          setSelectedMemoId(memo.id);
+                          setOpenDialog(true);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </>
                   }
                 >
                   <ListItemText
