@@ -23,12 +23,10 @@ export function setUserToLocalStorage(user?: User) {
   if (user?.uid) {
     localStorage.setItem("userId", user.uid);
     localStorage.setItem("userName", user.displayName || "");
-    localStorage.setItem("apiKey", user.apiKey || "");
   }
 }
 
 export function clearUserInLocalStorage() {
   localStorage.removeItem("userId");
   localStorage.removeItem("userName");
-  localStorage.removeItem("apiKey");
 }
