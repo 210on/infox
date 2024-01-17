@@ -163,12 +163,10 @@ export function Memo(): JSX.Element {
       <Grid item xs={12}>
         <ReactTags
           tags={Array.isArray(tags) ? tags : []}
-          //tags={tags}
           handleDelete={handleDelete}
           handleAddition={handleAddition}
           handleDrag={handleDrag}
           delimiters={[188, 13]} // カンマとエンターキー
-          tagComponent={CustomTagComponent}
         />
       </Grid>
 
