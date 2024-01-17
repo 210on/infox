@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Box, Typography } from "@mui/material";
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Button, Typography } from "@mui/material";
 import { searchMemoById } from "../services/searchMemo";
 import { useRecoilValue } from 'recoil';
 import { userAtom } from '../states/userAtom';
@@ -14,6 +14,11 @@ export function ViewMemo(): JSX.Element {
   const loginUser = useRecoilValue(userAtom);
   const [memo, setMemo] = useState<Memo | null>(null);
   const safeContent = memo ? DOMPurify.sanitize(memo.content) : "";
+
+  const navigate = useNavigate();
+  const backToMemoList = () => {
+    navigate("/memolist");
+  };
 
   useEffect(() => {
     const fetchMemo = async () => {
@@ -40,6 +45,7 @@ export function ViewMemo(): JSX.Element {
   }
 
   return (
+    <>
     <Box sx={{ padding: "20px" }}>
       <Typography variant="h2">{memo.title}</Typography>
       <Box sx={{ marginTop: "20px" }}>
@@ -47,5 +53,13 @@ export function ViewMemo(): JSX.Element {
         {/* タグや作成日時など、他の情報もここに表示できるよ */}
       </Box>
     </Box>
+  <Button
+    variant="outlined"
+    onClick={() => backToMemoList()}
+    sx={{ marginLeft: 2 }}
+  >
+    Back
+  </Button>
+  </>
   );
 }
