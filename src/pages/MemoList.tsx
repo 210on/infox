@@ -13,6 +13,7 @@ import {
   Switch,
   FormControlLabel
 } from "@mui/material";
+import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
@@ -47,6 +48,13 @@ export function MemoList(): JSX.Element {
   const [showNoResults, setShowNoResults] = useState(false); 
   const [showResults,setShowResults] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [savedOrder, setSavedOrder] = useState<Memo[]>([]);
+
+  const handleSaveOrder = () => {
+    setSavedOrder([...memoList]);
+    // ここでバックエンドに保存するロジックを追加することができます
+  };
+  //これが消えるまでなら戻してよい
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -115,6 +123,15 @@ export function MemoList(): JSX.Element {
       }
       if (reverseOrder) {
         sortedList.reverse(); // 逆順にする
+      }
+      if (selectedOrder === "custom") {
+        const savedMemos = savedOrder;
+        const unsavedMemos = memoList.filter(
+          memo => !savedMemos.find(savedMemo => savedMemo.id === memo.id)
+        );
+    
+        // 未保存のメモをリストの上部に配置
+        sortedList = [...unsavedMemos, ...savedMemos];
       }
       setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
   };
@@ -211,6 +228,7 @@ export function MemoList(): JSX.Element {
           <MenuItem value="update">Update</MenuItem>
           <MenuItem value="title">Title</MenuItem>
           <MenuItem value="date">Date</MenuItem>
+          <MenuItem value="custom">Custom</MenuItem>
           {/* ここに他の並び替えオプションを追加 */}
         </Select>
         <FormControlLabel
@@ -220,6 +238,9 @@ export function MemoList(): JSX.Element {
         />
         <SwapVerticalCircleIcon />
       </Box>
+      <Button variant="contained" onClick={handleSaveOrder}>
+        Save
+      </Button>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <TextField
