@@ -11,6 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton } from "@mui/material";
 import { useState } from "react";
 import { ViewMemo } from "./services/ViewMemo";
+import {APIKeyPage} from "./pages/APIKeyPage";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
             <Route path="/memolist" element={<MemoList />} />
             <Route path="/memo/:id?" element={<Memo />} />
             <Route path="/view/:id" element={<ViewMemo />} />
+            <Route path="/api-key" element={<APIKeyPage />} />
           </Routes>
         </div>
         <IconButton className="fixedIconButton" onClick={handleSidebarOpen}>
