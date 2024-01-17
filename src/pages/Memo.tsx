@@ -168,6 +168,7 @@ export function Memo(): JSX.Element {
           handleAddition={handleAddition}
           handleDrag={handleDrag}
           delimiters={[188, 13]} // カンマとエンターキー
+          tagComponent={CustomTagComponent}
         />
       </Grid>
 
