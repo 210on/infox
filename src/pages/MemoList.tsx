@@ -10,8 +10,8 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
-  Switch,
-  FormControlLabel
+  //Switch,
+  //FormControlLabel
 } from "@mui/material";
 import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
@@ -187,7 +187,7 @@ export function MemoList(): JSX.Element {
   };
 
   const handleReverseToggle = () => {
-    setReverseOrder(!reverseOrder);
+    setReverseOrder(prevreverseOrder => !prevreverseOrder);
     setMemoList((prevList) => [...prevList].reverse());
   };
 
@@ -270,19 +270,20 @@ export function MemoList(): JSX.Element {
         <Typography variant="body1" sx={{ marginRight: "10px" }}>
           Sort by:
         </Typography>
-        <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' }}>
+        <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' , marginRight: 2}}>
           <MenuItem value="update">Update</MenuItem>
           <MenuItem value="title">Title</MenuItem>
           <MenuItem value="date">Date</MenuItem>
           <MenuItem value="custom">Custom</MenuItem>
           {/* ここに他の並び替えオプションを追加 */}
         </Select>
-        <FormControlLabel
-          control={<Switch checked={reverseOrder} onChange={handleReverseToggle} />}
-          label="Reverse"
-          labelPlacement="start"
+        <Typography sx={{ marginRight: 2 }}>
+          Reverse
+        </Typography>
+        <SwapVerticalCircleIcon
+          onClick={handleReverseToggle}
+          style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out', cursor: 'pointer' }}
         />
-        <SwapVerticalCircleIcon />
       </Box>
       <Button variant="contained" onClick={handleSaveOrder}>
         Sort's Save
