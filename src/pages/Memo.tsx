@@ -11,7 +11,8 @@ import 'react-quill/dist/quill.snow.css';
 import './toolbar.css';
 import { useEffect, useState } from 'react';//suzu
 import { WithContext as ReactTags } from 'react-tag-input';//suzu
-
+import { collection, getDocs } from 'firebase/firestore';
+import { database } from "../infrastructure/firebase";
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -47,6 +48,12 @@ export function Memo(): JSX.Element {
     setTags(newTags);
   };
 
+  const getMemoCount = async (userId :string) => {
+    // Firestoreからメモの数を取得するロジック
+    const memosSnapshot = await getDocs(collection(database, "users", userId, "memos"));
+    return memosSnapshot.docs.length;
+  };
+
   const params = useParams();
   const id = params.id;
   const screenTitle = (!id ? "Create" : "Update") + " memo";
@@ -63,31 +70,39 @@ export function Memo(): JSX.Element {
       setTitleError(true);
       return;
     }
-    const updatedAt = new Date();
-    let memoCreatedAt = createdAt;
-    if (!id && !createdAt) {
-      setCreatedAt(updatedAt);
-    }
-    if (memoCreatedAt) {
-      try {
-        //await saveMemo({ id, title, content, updatedAt, createdAt: createdAt || updatedAt }, loginUser);
-        await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt }, loginUser);
-        
-        setMessageAtom((prev) => ({
-          ...prev,
-          ...successMessage("Saved"),
-        }));
-        navigate("/memolist");
-        //backToMemoList();
-      } catch (e) {
-        setMessageAtom((prev) => ({
-          ...prev,
-          ...exceptionMessage(),
-        }));
+    if (loginUser && loginUser.userId) {
+      const updatedAt = new Date();
+      let memoCreatedAt = createdAt;
+      if (!id && !createdAt) {
+        setCreatedAt(() => {
+          memoCreatedAt = new Date();
+          return memoCreatedAt;
+        });
       }
-    } else {
-      // createdAt が null の場合のエラーハンドリング
-      console.error("createdAt is null");
+      if (memoCreatedAt) {
+        try {
+          let orderValue =0;
+          if (!id) {
+            orderValue = await getMemoCount(loginUser.userId);
+          }
+
+          await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          setMessageAtom((prev) => ({
+            ...prev,
+            ...successMessage("Saved"),
+          }));
+          navigate("/memolist");
+          //backToMemoList();
+        } catch (e) {
+          setMessageAtom((prev) => ({
+            ...prev,
+            ...exceptionMessage(),
+          }));
+        }
+      } else {
+        // createdAt が null の場合のエラーハンドリング
+        console.error("createdAt is null");
+      }
     }
   };
 

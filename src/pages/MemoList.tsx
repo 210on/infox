@@ -32,6 +32,8 @@ import { exceptionMessage, successMessage } from "../utils/messages";
 import infoxLogoset from "/infox_logo_typo.svg";
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { doc, updateDoc } from "firebase/firestore";
+import { database } from "../infrastructure/firebase";
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -48,13 +50,27 @@ export function MemoList(): JSX.Element {
   const [showNoResults, setShowNoResults] = useState(false); 
   const [showResults,setShowResults] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [savedOrder, setSavedOrder] = useState<Memo[]>([]);
 
-  const handleSaveOrder = () => {
-    setSavedOrder([...memoList]);
-    // ここでバックエンドに保存するロジックを追加することができます
+  const handleSaveOrder = async () => {
+    if (loginUser && loginUser.userId) {
+      const updatedMemoList = []; // 更新されたメモのリストを一時的に保存する配列
+      for (let i = 0; i < memoList.length; i++) {
+        const memo = memoList[i];
+        if (memo.id) {
+          const newOrder = memoList.length - 1 - i;
+          await updateMemoOrder(loginUser.userId, memo.id, newOrder);
+          updatedMemoList.push({...memo, order: newOrder}); // 更新されたメモを追加
+        }
+      }
+      const sortedList = sortMemoList("custom", updatedMemoList); // 更新されたリストでカスタム順にソート
+      setMemoList(sortedList);
+      setOrderBy("custom"); // 並び順をCustomに設定
+      setMessageAtom((prev) => ({
+        ...prev,
+        ...successMessage("Sort's Save"),
+      }));
+    }
   };
-  //これが消えるまでなら戻してよい
 
   const moveToMemo = (id?: string) => {
     if (id) {
@@ -68,9 +84,12 @@ export function MemoList(): JSX.Element {
     try {
       const _memoList = await searchMemo(loginUser);
       if (_memoList) {
-        setMemoList(_memoList);
-        setUpdateOrder([..._memoList]); // Save update order
-        setOriginalMemoList([..._memoList]);
+        // Firebaseから取得したメモリストを更新順にソート
+        const sortedList = sortMemoList("update", _memoList);
+        setMemoList(sortedList); // ソートされたリストを設定
+        setUpdateOrder([...sortedList]); // 更新順序を保存
+        setOriginalMemoList([...sortedList]); // オリジナルリストを保存
+        setOrderBy("update"); // 並び順をUpdateに設定
       }
     } catch (e) {
       setMessageAtom((prev) => ({
@@ -79,6 +98,7 @@ export function MemoList(): JSX.Element {
       }));
     }
   }, [loginUser, setMessageAtom]);
+
 
   const onClickDelete = async (id?: string) => {
     if (!id) {
@@ -105,36 +125,52 @@ export function MemoList(): JSX.Element {
     getMemoList();
   }, [loginUser, getMemoList]);
 
-  const handleSortChange = (event: SelectChangeEvent<string>) => {
-    if (isDragging) return;  // ドラッグ中はソートを実行しない
-      const selectedOrder = event.target.value as string;
-      setOrderBy(selectedOrder);
-      let sortedList = [...memoList];
-      if (selectedOrder === "title") {
-        sortedList = [...memoList].sort((a, b) => a.title.localeCompare(b.title));
-      }
-      if (selectedOrder === "date") {
-        sortedList = [...memoList].sort((a, b) => {
-          // 型アサーションを使用して Timestamp の seconds にアクセス
+  const updateMemoOrder = async (userId :string, memoId :string, newOrder :number) => {
+    const memoRef = doc(database, "users", userId, "memos", memoId);
+    await updateDoc(memoRef, { order: newOrder });
+  };
+
+  const sortMemoList = (sortOption:string, memoList: Memo[]): Memo[] => {
+    let sortedList = [...memoList];
+    switch (sortOption) {
+      case "update":
+        sortedList.sort((a, b) => {
+          const secondsA = (a.updatedAt as any).seconds;
+          const secondsB = (b.updatedAt as any).seconds;
+          return secondsB - secondsA;
+        });
+        break;
+      case "title":
+        sortedList.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "date":
+        sortedList.sort((a, b) => {
           const secondsA = (a.createdAt as any).seconds;
           const secondsB = (b.createdAt as any).seconds;
-          return secondsA - secondsB;
+          return secondsB - secondsA;
         });
-      }
-      if (reverseOrder) {
-        sortedList.reverse(); // 逆順にする
-      }
-      if (selectedOrder === "custom") {
-        const savedMemos = savedOrder;
-        const unsavedMemos = memoList.filter(
-          memo => !savedMemos.find(savedMemo => savedMemo.id === memo.id)
-        );
-    
-        // 未保存のメモをリストの上部に配置
-        sortedList = [...unsavedMemos, ...savedMemos];
-      }
-      setMemoList(selectedOrder === "update" ? updateOrder : sortedList);
+        break;
+      case "custom":
+        sortedList.sort((a, b) => b.order - a.order);
+        break;
+      default:
+        // 他のソートロジック（必要に応じて）
+        break;
+    }
+    if (reverseOrder) {
+      sortedList.reverse();
+    }
+    return sortedList;
   };
+  
+  const handleSortChange = (event: SelectChangeEvent<string>) => {
+    if (isDragging) return;
+    const selectedOrder = event.target.value;
+    setOrderBy(selectedOrder);
+    const sortedList = sortMemoList(selectedOrder, memoList);
+    setMemoList(sortedList);
+  };
+  
 
   const handleNewMemo = () => {
     moveToMemo();
@@ -239,7 +275,7 @@ export function MemoList(): JSX.Element {
         <SwapVerticalCircleIcon />
       </Box>
       <Button variant="contained" onClick={handleSaveOrder}>
-        Save
+        Sort's Save
       </Button>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>

@@ -6,6 +6,7 @@ export type Memo = {
   tags: Tag[];
   updatedAt: Date;
   createdAt: Date;
+  order: number;
 };
 
 export type Tag = {
