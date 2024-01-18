@@ -121,6 +121,16 @@ export function MemoList(): JSX.Element {
     }
   };
 
+  const removeHtmlTags = (htmlString: string): string => {
+    // 新しい行で <br> タグを置き換える
+    const newlineRegex = /<br\s*\/?>/gi;
+    htmlString = htmlString.replace(newlineRegex, ' ');
+    
+    // DOMParserを使用してHTML文字列からHTMLタグを取り除く
+    const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+    return doc.body.textContent || "";
+  };
+
   useEffect(() => {
     getMemoList();
   }, [loginUser, getMemoList]);
@@ -226,7 +236,7 @@ export function MemoList(): JSX.Element {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setMemoList(items);
+    setMemoList(items);  
   };
 
 
@@ -373,7 +383,7 @@ export function MemoList(): JSX.Element {
                           width: '80%',
                           display: 'inline-block' // インライン要素でも幅を適用させる
                         }}>
-                          {truncateText(memo.content, 100)}
+                          {truncateText(removeHtmlTags(memo.content), 100)}
                         </span>
                       </>
                     }

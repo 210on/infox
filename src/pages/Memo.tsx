@@ -11,6 +11,7 @@ import 'react-quill/dist/quill.snow.css';
 import './toolbar.css';
 import { useEffect, useState } from 'react';//suzu
 import { WithContext as ReactTags } from 'react-tag-input';//suzu
+import { OpenAI } from "openai";
 import { collection, getDocs } from 'firebase/firestore';
 import { database } from "../infrastructure/firebase";
 
@@ -22,11 +23,15 @@ export function Memo(): JSX.Element {
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
 
-  
-  // タグ関連の状態とイベントハンドラー
-  const [tags, setTags] = useState<Tag[]>([
-    { id: '1', text: 'タグなし' }
-  ]);
+  let openai: OpenAI;
+  if (loginUser?.apiKey) {
+    openai = new OpenAI({
+      apiKey: loginUser.apiKey,
+      dangerouslyAllowBrowser: true
+    });
+  }
+
+  const [tags, setTags] = useState<Tag[]>([]);
 
   interface Tag {
     id: string;
@@ -65,6 +70,24 @@ export function Memo(): JSX.Element {
     navigate("/memolist");
   };
 
+  const generateTags = async (content: string): Promise<Tag[]> => {
+    const gptResponse = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{"role": "user", "content": "与えられたテキストから適切なハッシュタグを生成してください。テキストの主要なトピックやキーワードを考慮し、関連性の高いタグを提案してください。"}, {"role": "user", "content": content}],
+      temperature: 0.5,
+      max_tokens: 60,
+    });
+
+    const messageContent = gptResponse.choices[0].message.content;
+    if (messageContent === null) {
+      return [];
+    }
+    const tags = messageContent.split(" ").map((tag, index) => {
+      return { id: index.toString(), text: tag };
+    });
+    return tags;
+  };
+
   const save = async () => {
     if (!title) {
       setTitleError(true);
@@ -82,18 +105,30 @@ export function Memo(): JSX.Element {
       if (memoCreatedAt) {
         try {
           let orderValue =0;
-          if (!id) {
-            orderValue = await getMemoCount(loginUser.userId);
+            if (!id) {
+              orderValue = await getMemoCount(loginUser.userId);
+            }
+          if (!loginUser.apiKey) {
+            await saveMemo({ id, title, content, tags:[], updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+            setMessageAtom((prev) => ({
+              ...prev,
+              ...successMessage("Saved"),
+            }));
+            navigate("/memolist");
+            return;
           }
-
-          await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          else {
+          const generatedTags = await generateTags(content);
+          setTags(generatedTags);
+    
+          await saveMemo({ id, title, content, tags: generatedTags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          
           setMessageAtom((prev) => ({
             ...prev,
             ...successMessage("Saved"),
           }));
           navigate("/memolist");
-          //backToMemoList();
-        } catch (e) {
+        }} catch (e) {
           setMessageAtom((prev) => ({
             ...prev,
             ...exceptionMessage(),
@@ -130,6 +165,7 @@ export function Memo(): JSX.Element {
 
     get();
   }, [id, loginUser, setMessageAtom]);
+
 
   return (
     <>
@@ -178,7 +214,6 @@ export function Memo(): JSX.Element {
       <Grid item xs={12}>
         <ReactTags
           tags={Array.isArray(tags) ? tags : []}
-          //tags={tags}
           handleDelete={handleDelete}
           handleAddition={handleAddition}
           handleDrag={handleDrag}
