@@ -12,8 +12,8 @@ import './toolbar.css';
 import { useEffect, useState } from 'react';//suzu
 import { WithContext as ReactTags } from 'react-tag-input';//suzu
 import { OpenAI } from "openai";
-
-
+import { collection, getDocs } from 'firebase/firestore';
+import { database } from "../infrastructure/firebase";
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -43,7 +43,8 @@ export function Memo(): JSX.Element {
   };
 
   const handleAddition = (tag: Tag) => {
-    setTags([...tags, tag]);
+    const formattedTag = { id: tag.id, text: `#${tag.text}` };
+    setTags([...tags, formattedTag]);
   };
 
   const handleDrag = (tag: Tag, currPos: number, newPos: number) => {
@@ -51,6 +52,11 @@ export function Memo(): JSX.Element {
     newTags.splice(currPos, 1);
     newTags.splice(newPos, 0, tag);
     setTags(newTags);
+  };
+
+  const getMemoCount = async (userId :string) => {
+    const memosSnapshot = await getDocs(collection(database, "users", userId, "memos"));
+    return memosSnapshot.docs.length;
   };
 
   const params = useParams();
@@ -87,42 +93,52 @@ export function Memo(): JSX.Element {
       setTitleError(true);
       return;
     }
-    const updatedAt = new Date();
-    const memoCreatedAt = createdAt;
-    if (!id && !createdAt) {
-      setCreatedAt(updatedAt);
-    }
-    if (memoCreatedAt) {
-      try {
-        if (!loginUser.apiKey) {
-          await saveMemo({ id, title, content, tags:[], updatedAt, createdAt: memoCreatedAt }, loginUser);
+    if (loginUser && loginUser.userId) {
+      const updatedAt = new Date();
+      let memoCreatedAt = createdAt;
+      if (!id && !createdAt) {
+        setCreatedAt(() => {
+          memoCreatedAt = new Date();
+          return memoCreatedAt;
+        });
+      }
+      if (memoCreatedAt) {
+        try {
+          let orderValue =0;
+            if (!id) {
+              orderValue = await getMemoCount(loginUser.userId);
+            }
+          if (!loginUser.apiKey) {
+            await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+            setMessageAtom((prev) => ({
+              ...prev,
+              ...successMessage("Saved"),
+            }));
+            navigate("/memolist");
+            return;
+          }
+          else {
+          const generatedTags = await generateTags(content);
+          const newTags = [...tags, ...generatedTags];
+          const uniqueTags = newTags.filter((tag, index, self) => self.findIndex((t) => t.text === tag.text) === index);
+          
+          await saveMemo({ id, title, content, tags: uniqueTags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          
           setMessageAtom((prev) => ({
             ...prev,
             ...successMessage("Saved"),
           }));
           navigate("/memolist");
-          return;
+        }} catch (e) {
+          setMessageAtom((prev) => ({
+            ...prev,
+            ...exceptionMessage(),
+          }));
         }
-        else {
-        const generatedTags = await generateTags(content);
-        setTags(generatedTags);
-  
-        await saveMemo({ id, title, content, tags: generatedTags, updatedAt, createdAt: memoCreatedAt }, loginUser);
-        
-        setMessageAtom((prev) => ({
-          ...prev,
-          ...successMessage("Saved"),
-        }));
-        navigate("/memolist");
-      }} catch (e) {
-        setMessageAtom((prev) => ({
-          ...prev,
-          ...exceptionMessage(),
-        }));
+      } else {
+        // createdAt が null の場合のエラーハンドリング
+        console.error("createdAt is null");
       }
-    } else {
-      // createdAt が null の場合のエラーハンドリング
-      setCreatedAt(new Date());
     }
   };
 
@@ -164,7 +180,8 @@ export function Memo(): JSX.Element {
             <Grid item xs={12}>
               <TextField
                 label="Title"
-                variant="outlined"
+                id="standard-basic"
+                variant="standard"
                 required
                 fullWidth
                 value={title}
@@ -197,15 +214,14 @@ export function Memo(): JSX.Element {
             {/* ReactTags コンポーネントの配置 */}
             
       <Grid item xs={12}>
-        <ReactTags
-          tags={Array.isArray(tags) ? tags : []}
-          handleDelete={handleDelete}
-          handleAddition={handleAddition}
-          handleDrag={handleDrag}
-          delimiters={[188, 13]} // カンマとエンターキー
-        />
+      <ReactTags
+            tags={Array.isArray(tags) ? tags : []}
+            handleDelete={handleDelete}
+            handleAddition={handleAddition}
+            handleDrag={handleDrag}
+            delimiters={[188, 13]} // カンマとエンターキー
+          />
       </Grid>
-
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save

@@ -55,6 +55,10 @@ export function APIKeyPage(): JSX.Element {
 					</Button>
 				</form>
 			)}
+			<br />
+			API Keyを入力することで、自動タグ付け機能が使えるようになります。
+			<br />
+			API Keyは<a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a>から取得できます。
 		</div>
 	);
 }
