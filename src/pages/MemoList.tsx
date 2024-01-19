@@ -372,7 +372,7 @@ export function MemoList(): JSX.Element {
                         </span>
                         <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
                         {memo.tags && memo.tags.length > 0 
-                        ? "#" + memo.tags.map(tag => tag.text).join(', ')
+                        ? memo.tags.map(tag => tag.text).join(', ')
                         : ''}
                         </span>
                       </>

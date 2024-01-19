@@ -43,7 +43,8 @@ export function Memo(): JSX.Element {
   };
 
   const handleAddition = (tag: Tag) => {
-    setTags([...tags, tag]);
+    const formattedTag = { id: tag.id, text: `#${tag.text}` };
+    setTags([...tags, formattedTag]);
   };
 
   const handleDrag = (tag: Tag, currPos: number, newPos: number) => {
@@ -54,7 +55,6 @@ export function Memo(): JSX.Element {
   };
 
   const getMemoCount = async (userId :string) => {
-    // Firestoreからメモの数を取得するロジック
     const memosSnapshot = await getDocs(collection(database, "users", userId, "memos"));
     return memosSnapshot.docs.length;
   };
@@ -109,7 +109,7 @@ export function Memo(): JSX.Element {
               orderValue = await getMemoCount(loginUser.userId);
             }
           if (!loginUser.apiKey) {
-            await saveMemo({ id, title, content, tags:[], updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+            await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
             setMessageAtom((prev) => ({
               ...prev,
               ...successMessage("Saved"),
@@ -119,9 +119,10 @@ export function Memo(): JSX.Element {
           }
           else {
           const generatedTags = await generateTags(content);
-          setTags(generatedTags);
-    
-          await saveMemo({ id, title, content, tags: generatedTags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          const newTags = [...tags, ...generatedTags];
+          const uniqueTags = newTags.filter((tag, index, self) => self.findIndex((t) => t.text === tag.text) === index);
+          
+          await saveMemo({ id, title, content, tags: uniqueTags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
           
           setMessageAtom((prev) => ({
             ...prev,
@@ -179,7 +180,8 @@ export function Memo(): JSX.Element {
             <Grid item xs={12}>
               <TextField
                 label="Title"
-                variant="outlined"
+                id="standard-basic"
+                variant="standard"
                 required
                 fullWidth
                 value={title}
@@ -212,15 +214,14 @@ export function Memo(): JSX.Element {
             {/* ReactTags コンポーネントの配置 */}
             
       <Grid item xs={12}>
-        <ReactTags
-          tags={Array.isArray(tags) ? tags : []}
-          handleDelete={handleDelete}
-          handleAddition={handleAddition}
-          handleDrag={handleDrag}
-          delimiters={[188, 13]} // カンマとエンターキー
-        />
+      <ReactTags
+            tags={Array.isArray(tags) ? tags : []}
+            handleDelete={handleDelete}
+            handleAddition={handleAddition}
+            handleDrag={handleDrag}
+            delimiters={[188, 13]} // カンマとエンターキー
+          />
       </Grid>
-
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save
