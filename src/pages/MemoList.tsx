@@ -10,6 +10,7 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Container,
   //Switch,
   //FormControlLabel
 } from "@mui/material";
@@ -19,6 +20,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Delete } from "@mui/icons-material";
+import { ThemeProvider, useTheme } from '@mui/material/styles';
 import { useState, useEffect, useCallback } from "react";
 import { searchMemo } from "../services/searchMemo";
 import { Memo } from "../services/memoType";
@@ -236,17 +238,18 @@ export function MemoList(): JSX.Element {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setMemoList(items);  
+    setMemoList(items);
   };
 
+  const theme = useTheme();
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
+      <Container>
       <Grid container spacing={2} alignItems="center">
-        <Grid container item xs={3}>
+        <Grid item xs={8} sm={6} md={4}>
           <img src={infoxLogoset} />
         </Grid>
-        <Grid container item xs={9}></Grid>
       </Grid>
       <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppableMemos">
@@ -261,12 +264,28 @@ export function MemoList(): JSX.Element {
             >
 
       <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        marginBottom="20px"
+        sx={{
+          display: "flex",
+          flexDirection: {
+            xs: 'column', // xsサイズでは縦並び
+            md: 'row'     // mdサイズでは横並び
+          },
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
       >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: {
+                xs: '100%',
+                //sm: '50%',
+                //md: '25%'
+            },
+          }}
+        >
         <Typography variant="body1" sx={{ marginRight: "10px" }}>
           Sort by:
         </Typography>
@@ -430,6 +449,7 @@ export function MemoList(): JSX.Element {
           },
         ]}
       />
-    </>
+    </Container>
+    </ThemeProvider>
   );
 }
