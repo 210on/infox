@@ -50,6 +50,11 @@ export function ViewMemo(): JSX.Element {
       <Typography variant="h2">{memo.title}</Typography>
       <Box sx={{ marginTop: "20px" }}>
         <div dangerouslySetInnerHTML={{ __html: safeContent }} />
+        <span style={{ marginLeft: '10px', color: 'gray', fontSize: '0.8em' }}>
+        {memo.tags && memo.tags.length > 0 
+        ? memo.tags.map(tag => tag.text).join(', ')
+        : ''}
+        </span>
         {/* タグや作成日時など、他の情報もここに表示できるよ */}
       </Box>
     </Box>
