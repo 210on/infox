@@ -14,11 +14,12 @@ import { WithContext as ReactTags } from 'react-tag-input';//suzu
 import { OpenAI } from "openai";
 import { collection, getDocs } from 'firebase/firestore';
 import { database } from "../infrastructure/firebase";
+import './Memo.css';
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
   const setMessageAtom = useSetRecoilState(messageAtom);
-
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [content, setContent] = useState("");
@@ -37,6 +38,20 @@ export function Memo(): JSX.Element {
     id: string;
     text: string;
   }
+
+  const manuallyGenerateTags = async () => {
+    setIsGeneratingTags(true); // タグ生成開始
+    const generatedTags = await generateTags(content);
+    generatedTags.forEach((tag, index) => {
+      if (tag.text.match(/#/g)?.length !== 1) {
+        generatedTags.splice(index, 1);
+      }
+    });
+    const newTags = [...tags, ...generatedTags];
+    const uniqueTags = newTags.filter((tag, index, self) => self.findIndex((t) => t.text === tag.text) === index);
+    setTags(uniqueTags);
+    setIsGeneratingTags(false); // タグ生成終了
+  };
 
   const handleDelete = (i: number) => {
     setTags(tags.filter((tag, index) => index !== i));
@@ -116,31 +131,17 @@ export function Memo(): JSX.Element {
       if (memoCreatedAt) {
         try {
           let orderValue =0;
-            if (!id) {
-              orderValue = await getMemoCount(loginUser.userId);
-            }
-          if (!loginUser.apiKey) {
-            await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
-            setMessageAtom((prev) => ({
-              ...prev,
-              ...successMessage("Saved"),
-            }));
-            navigate("/memolist");
-            return;
+          if (!id) {
+            orderValue = await getMemoCount(loginUser.userId);
           }
-          else {
-          const generatedTags = await generateTags(content);
-          const newTags = [...tags, ...generatedTags];
-          const uniqueTags = newTags.filter((tag, index, self) => self.findIndex((t) => t.text === tag.text) === index);
-          
-          await saveMemo({ id, title, content, tags: uniqueTags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
-          
+          await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
           setMessageAtom((prev) => ({
             ...prev,
             ...successMessage("Saved"),
           }));
           navigate("/memolist");
-        }} catch (e) {
+          return;
+        } catch (e) {
           setMessageAtom((prev) => ({
             ...prev,
             ...exceptionMessage(),
@@ -220,19 +221,25 @@ export function Memo(): JSX.Element {
                   ]
                 }}
               />
+            </Grid>            
+            <Grid item xs={12}>
+              <ReactTags
+                tags={Array.isArray(tags) ? tags : []}
+                handleDelete={handleDelete}
+                handleAddition={handleAddition}
+                handleDrag={handleDrag}
+                delimiters={[188, 13]} // カンマとエンターキー
+              />
             </Grid>
-
-            {/* ReactTags コンポーネントの配置 */}
-            
-      <Grid item xs={12}>
-      <ReactTags
-            tags={Array.isArray(tags) ? tags : []}
-            handleDelete={handleDelete}
-            handleAddition={handleAddition}
-            handleDrag={handleDrag}
-            delimiters={[188, 13]} // カンマとエンターキー
-          />
-      </Grid>
+            {loginUser.apiKey && (
+              <Grid item xs={12}>
+                {/* タグ生成ボタンの追加 */}
+                <Button variant="contained" onClick={() => manuallyGenerateTags()}>
+                  Generate Tags
+                </Button>
+                {isGeneratingTags && <Typography>Generating...</Typography>}
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save
