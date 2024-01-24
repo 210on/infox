@@ -71,6 +71,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <AddCircleIcon />
 				<ListItemText primary="API Keyを登録する" />
 			</ListItem>
+      <ListItem component={Link} to="/help">
+        <AddCircleIcon />
+				<ListItemText primary="Infoxの使い方" />
+			</ListItem>
 			</>
 		) : (
 			<>

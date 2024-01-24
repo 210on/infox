@@ -12,6 +12,7 @@ import { IconButton } from "@mui/material";
 import { useState } from "react";
 import { ViewMemo } from "./services/ViewMemo";
 import {APIKeyPage} from "./pages/APIKeyPage";
+import {Help} from "./pages/Help";
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="/memo/:id?" element={<Memo />} />
             <Route path="/view/:id" element={<ViewMemo />} />
             <Route path="/api-key" element={<APIKeyPage />} />
+            <Route path="/help" element={<Help />} />
           </Routes>
         </div>
         <IconButton className="fixedIconButton" onClick={handleSidebarOpen}>
