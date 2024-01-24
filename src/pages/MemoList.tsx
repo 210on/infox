@@ -30,7 +30,7 @@ import { messageAtom } from "../states/messageAtom";
 import { SimpleDialog } from "../components/SimpleDialog";
 import { exceptionMessage, successMessage } from "../utils/messages";
 import infoxLogoset from "/infox_logo_typo.svg";
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { doc, updateDoc } from "firebase/firestore";
 import { database } from "../infrastructure/firebase";
@@ -67,7 +67,7 @@ export function MemoList(): JSX.Element {
       setOrderBy("custom"); // 並び順をCustomに設定
       setMessageAtom((prev) => ({
         ...prev,
-        ...successMessage("Sort's Save"),
+        ...successMessage("Sort's Saved"),
       }));
     }
   };
@@ -329,15 +329,23 @@ export function MemoList(): JSX.Element {
 
         return (
           <Draggable key={memo.id} draggableId={memo.id!} index={index}>
-            {(provided) => (
+            {(provided, snapshot: DraggableStateSnapshot) => (
               <div
               ref={provided.innerRef}
               {...provided.draggableProps}
               {...provided.dragHandleProps}
+              style={{
+                ...provided.draggableProps.style,
+                margin: "0 0 8px 0",
+                border: "1px solid #e0e0e0",
+                backgroundColor: snapshot.isDragging ? "#f0f0f0" : "white",
+                boxShadow: snapshot.isDragging ? "0px 2px 3px rgba(0,0,0,0.2)" : "none",
+                borderRadius: "10px"
+              }}
               >
                 <ListItem
                   key={memo.id}
-                  sx={{ cursor: "pointer" }}
+                  sx={{ cursor: "pointer", borderRadius: "10px" }}
                   secondaryAction={
                     <>
                       {/* 新しい閲覧アイコンボタン */}
