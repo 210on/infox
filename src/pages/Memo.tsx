@@ -14,6 +14,7 @@ import { WithContext as ReactTags } from 'react-tag-input';//suzu
 import { OpenAI } from "openai";
 import { collection, getDocs } from 'firebase/firestore';
 import { database } from "../infrastructure/firebase";
+import './Memo.css';
 
 export function Memo(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
