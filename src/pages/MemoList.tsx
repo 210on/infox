@@ -50,7 +50,7 @@ export function MemoList(): JSX.Element {
   const [showNoResults, setShowNoResults] = useState(false); 
   const [showResults,setShowResults] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-
+  
   const handleSaveOrder = async () => {
     if (loginUser && loginUser.userId) {
       const updatedMemoList = []; // 更新されたメモのリストを一時的に保存する配列
@@ -216,7 +216,8 @@ export function MemoList(): JSX.Element {
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     searchMemos(searchKeyword);
   };
 
@@ -266,6 +267,8 @@ export function MemoList(): JSX.Element {
         alignItems="center"
         marginBottom="20px"
       >
+
+      
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography variant="body1" sx={{ marginRight: "10px" }}>
           Sort by:
@@ -285,10 +288,12 @@ export function MemoList(): JSX.Element {
           style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out', cursor: 'pointer' }}
         />
       </Box>
+      
       <Button variant="contained" onClick={handleSaveOrder}>
         Sort's Save
       </Button>
-
+      
+      <form onSubmit={handleSearch}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <TextField
             label="Search memos"
@@ -302,10 +307,12 @@ export function MemoList(): JSX.Element {
               ),
           }}
           />
-          <Button variant="contained" onClick={handleSearch}>
+          <Button type="submit" variant="contained">
             <SearchIcon/>
           </Button>
+        
         </Box>
+        </form>
           <Button variant="contained" onClick={handleNewMemo}>
             <AddCircleIcon/>&nbsp;New memo
           </Button>
@@ -315,6 +322,7 @@ export function MemoList(): JSX.Element {
         <Typography variant="body1" sx={{ textAlign: 'center', marginTop: '20px' }}>
           {`Found ${memoList.length} memo(s)`}
         </Typography>
+        
       )}
       {memoList.map((memo, index) => {
         const createdTimestamp = memo.createdAt as any;
