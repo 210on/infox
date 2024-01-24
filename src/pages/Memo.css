@@ -1,0 +1,27 @@
+.ReactTags__selected span.ReactTags__tag {
+	display: inline-block;
+	margin: 0 .1em .6em 0;
+	padding: .6em;
+	line-height: 1;
+	text-decoration: none;
+	color: #00ACEE;
+	background-color: #fff;
+	border: 1px solid #00ACEE;
+	border-radius: 2em;
+}
+
+button {
+	all : unset;
+	color: #006086;
+	cursor: pointer;
+}
+
+.ReactTags__tagInput input{
+	width: 100%;
+    padding: 10px 15px; /*ボックスを大きくする*/
+    font-size: 16px;
+    border-radius: 3px; /*ボックス角の丸み*/
+    border: 2px solid #ddd; /*枠線*/
+    box-sizing: border-box;
+}
+
