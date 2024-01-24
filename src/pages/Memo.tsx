@@ -41,8 +41,15 @@ export function Memo(): JSX.Element {
 
   const manuallyGenerateTags = async () => {
     setIsGeneratingTags(true); // タグ生成開始
-    const newTags = await generateTags(content);
-    setTags(newTags);
+    const generatedTags = await generateTags(content);
+    generatedTags.forEach((tag, index) => {
+      if (tag.text.match(/#/g)?.length !== 1) {
+        generatedTags.splice(index, 1);
+      }
+    });
+    const newTags = [...tags, ...generatedTags];
+    const uniqueTags = newTags.filter((tag, index, self) => self.findIndex((t) => t.text === tag.text) === index);
+    setTags(uniqueTags);
     setIsGeneratingTags(false); // タグ生成終了
   };
 
@@ -127,24 +134,13 @@ export function Memo(): JSX.Element {
           if (!id) {
             orderValue = await getMemoCount(loginUser.userId);
           }
-          if (!loginUser.apiKey) {
-            await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
-            setMessageAtom((prev) => ({
-              ...prev,
-              ...successMessage("Saved"),
-            }));
-            navigate("/memolist");
-            return;
-          }
-          else {
-            await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
-          
-            setMessageAtom((prev) => ({
-              ...prev,
-              ...successMessage("Saved"),
-            }));
-            navigate("/memolist");
-          }
+          await saveMemo({ id, title, content, tags, updatedAt, createdAt: memoCreatedAt, order:orderValue }, loginUser);
+          setMessageAtom((prev) => ({
+            ...prev,
+            ...successMessage("Saved"),
+          }));
+          navigate("/memolist");
+          return;
         } catch (e) {
           setMessageAtom((prev) => ({
             ...prev,
@@ -235,13 +231,15 @@ export function Memo(): JSX.Element {
                 delimiters={[188, 13]} // カンマとエンターキー
               />
             </Grid>
-            <Grid item xs={12}>
-            {/* タグ生成ボタンの追加 */}
-              <Button variant="contained" onClick={() => manuallyGenerateTags()}>
-                Generate Tags
-              </Button>
-              {isGeneratingTags && <Typography>Generating...</Typography>}
-            </Grid>
+            {loginUser.apiKey && (
+              <Grid item xs={12}>
+                {/* タグ生成ボタンの追加 */}
+                <Button variant="contained" onClick={() => manuallyGenerateTags()}>
+                  Generate Tags
+                </Button>
+                {isGeneratingTags && <Typography>Generating...</Typography>}
+              </Grid>
+            )}
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => save()}>
                 Save
