@@ -71,21 +71,32 @@ export function Memo(): JSX.Element {
   };
 
   const generateTags = async (content: string): Promise<Tag[]> => {
-    const gptResponse = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{"role": "user", "content": "与えられたテキストから適切なハッシュタグを生成してください。テキストの主要なトピックやキーワードを考慮し、関連性の高いタグを提案してください。"}, {"role": "user", "content": content}],
-      temperature: 0.5,
-      max_tokens: 60,
-    });
-
-    const messageContent = gptResponse.choices[0].message.content;
-    if (messageContent === null) {
+    if (!openai) {
       return [];
     }
-    const tags = messageContent.split(" ").map((tag, index) => {
-      return { id: index.toString(), text: tag };
-    });
-    return tags;
+  
+    const textcontent = content.replace(/<[^>]*>?/gm, '');
+  
+    if (textcontent === "") {
+      return [];
+    }
+    else {
+      const gptResponse = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{"role": "user", "content": "与えられたテキストから適切なハッシュタグを生成してください。テキストの主要なトピックやキーワードを考慮し、関連性の高いタグを提案してください。"}, {"role": "user", "content": textcontent}],
+        temperature: 0.5,
+        max_tokens: 60,
+      });
+
+      const messageContent = gptResponse.choices[0].message.content;
+      if (messageContent === null) {
+        return [];
+      }
+      const tags = messageContent.split(" ").map((tag, index) => {
+        return { id: index.toString(), text: tag };
+      });
+      return tags;
+    }
   };
 
   const save = async () => {
