@@ -17,7 +17,7 @@ import {Help} from "./pages/Help";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  
   const handleSidebarOpen = () => {
     setIsSidebarOpen(true);
   };
@@ -29,7 +29,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <RecoilRoot>
-        <div>
+      <div style={{ marginRight: isSidebarOpen ? 300 : 0, transition: 'margin-right 0.5s' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/memolist" element={<MemoList />} />
