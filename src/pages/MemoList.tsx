@@ -17,6 +17,7 @@ import {
 import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Delete } from "@mui/icons-material";
@@ -267,13 +268,10 @@ export function MemoList(): JSX.Element {
       <Box
         sx={{
           display: "flex",
-          flexDirection: {
-            xs: 'column', // xsサイズでは縦並び
-            md: 'row'     // mdサイズでは横並び
-          },
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "20px",
+          flexWrap: 'wrap', // 必要に応じて折り返しを許可
         }}
       >
         <Box
@@ -282,36 +280,62 @@ export function MemoList(): JSX.Element {
             alignItems: "center",
             width: {
                 xs: '100%',
-                //sm: '50%',
-                //md: '25%'
+                sm: '70%',
+                //md: '50%'
             },
           }}
         >
-        <Typography variant="body1" sx={{ marginRight: "10px" }}>
-          Sort by:
-        </Typography>
-        <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' , marginRight: 2}}>
-          <MenuItem value="update">Update</MenuItem>
-          <MenuItem value="title">Title</MenuItem>
-          <MenuItem value="date">Date</MenuItem>
-          <MenuItem value="custom">Custom</MenuItem>
-          {/* ここに他の並び替えオプションを追加 */}
-        </Select>
-        <Typography sx={{ marginRight: 2 }}>
-          Reverse
-        </Typography>
-        <SwapVerticalCircleIcon
-          onClick={handleReverseToggle}
-          style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out', cursor: 'pointer' }}
-        />
-      </Box>
-      
-      <Button variant="contained" onClick={handleSaveOrder}>
-        Sort's Save
-      </Button>
+          <Typography variant="body1" sx={{ marginRight: "10px" }}>
+            Sort by:
+          </Typography>
+          <Select value={orderBy} onChange={handleSortChange} disabled={isDragging} sx={{ minWidth: '110px' , marginRight: 2}}>
+            <MenuItem value="update">Update</MenuItem>
+            <MenuItem value="title">Title</MenuItem>
+            <MenuItem value="date">Date</MenuItem>
+            <MenuItem value="custom">Custom</MenuItem>
+            {/* ここに他の並び替えオプションを追加 */}
+          </Select>
+          <Typography sx={{ marginRight: 2, display: { xs: 'none', sm: 'inline' } }}>
+            Reverse
+          </Typography>
+          <SwapVerticalCircleIcon
+            onClick={handleReverseToggle}
+            style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out', cursor: 'pointer' }}
+          />
+        </Box>
+        <Box>
+          <Button
+            variant="contained"
+            onClick={handleSaveOrder}
+            sx={{
+              width: {
+                xs: '10%',
+                sm: '100%'
+              },
+              mt: { xs: 1 },
+              mb: { xs: 1 }
+            }}
+            >
+            <PostAddIcon/>
+                  <Typography sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    &nbsp;Sort's Save
+                  </Typography>
+          </Button>
+        </Box>
       
       <form onSubmit={handleSearch}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: {
+              xs: '100%', // Extra small 画面サイズでの幅
+              //md: '100%'  // Medium 画面サイズでの幅
+            },
+            mt: { xs: 1 },
+            mb: { xs: 1 }
+          }}
+        >
           <TextField
             label="Search memos"
             value={searchKeyword}
@@ -330,9 +354,23 @@ export function MemoList(): JSX.Element {
         
         </Box>
         </form>
-          <Button variant="contained" onClick={handleNewMemo}>
-            <AddCircleIcon/>&nbsp;New memo
+        <Box>
+          <Button
+            variant="contained"
+            onClick={handleNewMemo}
+            sx={{
+              width: {
+                xs: '10%', // Extra small 画面サイズでの幅
+                sm: '100%'  // Medium 画面サイズでの幅
+              },
+            }}
+          >
+            <AddCircleIcon/>
+            <Typography sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              &nbsp;New memo
+            </Typography>
           </Button>
+          </Box>
         </Box>
         {memoList.length === 0 && showNoResults && <NoResultsMessage />}
         {searchKeyword &&showResults &&memoList.length > 0  && (
@@ -429,7 +467,7 @@ export function MemoList(): JSX.Element {
             </Draggable>
         )})}
       {provided.placeholder}
-      </Box>
+            </Box>
       )}
       </Droppable>
       </DragDropContext>
