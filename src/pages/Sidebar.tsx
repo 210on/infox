@@ -12,6 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { messageAtom } from "../states/messageAtom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { useEffect } from "react";
+import { sidebarState } from "../states/sidebarState";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,6 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const [message] = useRecoilState(messageAtom);
   const setMessageAtom = useSetRecoilState(messageAtom);
   const navigate = useNavigate();
+  const setSidebarState = useSetRecoilState(sidebarState);
 
   const signOut = async () => {
     signOutWithGoogle();
@@ -43,10 +48,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }));
   };
 
+  useEffect(() => {
+    setSidebarState(isOpen);
+  }, [isOpen, setSidebarState]);
+
   return (
     <>
-		<Drawer anchor="right" open={isOpen} onClose={onClose}>
-		<List>
+		<Drawer anchor="right" open={isOpen} onClose={onClose} variant="persistent" sx={{ width: 300 }}>
+    <div>
+        <IconButton onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </div>
+    <List>
 		{loginUser.userId ? (
 			<>
 			<Divider />
@@ -70,6 +84,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <ListItem component={Link} to="/api-key">
         <AddCircleIcon />
 				<ListItemText primary="API Keyを登録する" />
+			</ListItem>
+      <ListItem component={Link} to="/help">
+        <AddCircleIcon />
+				<ListItemText primary="Infoxの使い方" />
 			</ListItem>
 			</>
 		) : (
