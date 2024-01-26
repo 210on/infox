@@ -328,7 +328,7 @@ export function MemoList(): JSX.Element {
           </Typography>
           <SwapVerticalCircleIcon
             onClick={handleReverseToggle}
-            style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out', cursor: 'pointer' }}
+            style={{ transform: reverseOrder ? 'rotate(180deg)' : 'rotate(0deg)', fontSize: '30px', transition: 'transform 0.3s ease-in-out, color 0.3s ease-in-out', cursor: 'pointer', color: reverseOrder ? '#f4d6d6' : '#a64242', }}
           />
         </Box>
         <Box>

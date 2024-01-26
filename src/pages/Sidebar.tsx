@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { sidebarState } from "../states/sidebarState";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const matches = useMediaQuery('(max-width:600px)');
   const [loginUser] = useRecoilState(userAtom);
   const setUserAtom = useSetRecoilState(userAtom);
   const [message] = useRecoilState(messageAtom);
@@ -54,7 +56,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-		<Drawer anchor="right" open={isOpen} onClose={onClose} variant="persistent" sx={{ width: 300 }}>
+		<Drawer 
+        anchor="right" 
+        open={isOpen} 
+        onClose={onClose} 
+        variant={matches ? undefined : "persistent"} 
+        sx={{ width: 300 }}
+      >
     <div>
         <IconButton onClick={onClose}>
           <CloseIcon />
