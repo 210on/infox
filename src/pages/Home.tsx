@@ -34,7 +34,7 @@ export function Home(): JSX.Element {
   return (
     <>
       <Grid container spacing={2} alignItems="center">
-        <Grid container item xs={6} style={{ maxWidth: '50%' }}>
+        <Grid container item xs={6} style={{ maxWidth: '75%' }}>
           <img src={infoxLogoset} style={{ width: '100%', height: 'auto' }} />
         </Grid>
         <Grid container item xs={6}></Grid>
