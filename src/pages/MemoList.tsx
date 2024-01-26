@@ -308,7 +308,7 @@ export function MemoList(): JSX.Element {
             alignItems: "center",
             width: {
                 xs: '100%',
-                sm: '70%',
+                sm: '65%',
                 //md: '50%'
             },
           }}
