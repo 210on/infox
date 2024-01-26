@@ -29,7 +29,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <RecoilRoot>
-      <Box sx={{ marginRight: { xs: 0, sm: isSidebarOpen ? 20 : 0 }, transition: { xs: 'none', sm: 'margin-right 0.5s' }}}>
+      <Box sx={{ marginRight: { xs: 0, md: isSidebarOpen ? 20 : 0 }, transition: { xs: 'none', md: 'margin-right 0.5s' }}}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/memolist" element={<MemoList />} />

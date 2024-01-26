@@ -24,7 +24,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const matches = useMediaQuery('(max-width:600px)');
+  const matches = useMediaQuery('(max-width:900px)');
   const [loginUser] = useRecoilState(userAtom);
   const setUserAtom = useSetRecoilState(userAtom);
   const [message] = useRecoilState(messageAtom);
