@@ -41,6 +41,7 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableStateSnapsh
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { doc, updateDoc } from "firebase/firestore";
 import { database } from "../infrastructure/firebase";
+import { Stack } from "@mui/material";
 
 export function MemoList(): JSX.Element {
   const [loginUser] = useRecoilState(userAtom);
@@ -462,6 +463,7 @@ export function MemoList(): JSX.Element {
                   secondaryAction={
                     <>
                       {/* 新しい閲覧アイコンボタン */}
+                      <Stack direction={window.innerWidth <= 600 ? "column" : "row"}>
                       <IconButton
                         aria-label="view"
                         onClick={() => memo.id && navigate(`/view/${memo.id}`)}
@@ -477,6 +479,7 @@ export function MemoList(): JSX.Element {
                       >
                         <Delete />
                       </IconButton>
+                    </Stack>
                     </>
                   }
                 >
