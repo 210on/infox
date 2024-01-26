@@ -11,13 +11,17 @@ import {
   MenuItem,
   SelectChangeEvent,
   Container,
-  //Switch,
-  //FormControlLabel
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  useMediaQuery
 } from "@mui/material";
 import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import PostAddIcon from '@mui/icons-material/PostAdd';
+//import PlaylistAddCheckCircleIcon from '@mui/icons-material/PlaylistAddCheckCircle';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Delete } from "@mui/icons-material";
@@ -223,6 +227,16 @@ export function MemoList(): JSX.Element {
     event.preventDefault();
     searchMemos(searchKeyword);
   };
+  // 検索ボタンのクリックハンドラー
+  const handleSearchButtonClick = () => {
+    if (isSmallScreen) {
+      // 小さい画面サイズのとき、ダイアログを開く
+      handleOpenSearchDialog();
+    } else {
+      // 大きい画面サイズのとき、通常の検索処理を行う
+      searchMemos(searchKeyword);
+    }
+  };
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(event.target.value);
@@ -244,6 +258,17 @@ export function MemoList(): JSX.Element {
   };
 
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [openSearchDialog, setOpenSearchDialog] = useState(false);
+  // 検索ダイアログを開く
+  const handleOpenSearchDialog = () => {
+    setOpenSearchDialog(true);
+  };
+
+  // 検索ダイアログを閉じる
+  const handleCloseSearchDialog = () => {
+    setOpenSearchDialog(false);
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -268,7 +293,10 @@ export function MemoList(): JSX.Element {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: {
+            xs: "flex-start",
+            sm: "space-between"
+          },
           alignItems: "center",
           marginBottom: "20px",
           flexWrap: 'wrap', // 必要に応じて折り返しを許可
@@ -313,10 +341,11 @@ export function MemoList(): JSX.Element {
                 sm: '100%'
               },
               mt: { xs: 1 },
-              mb: { xs: 1 }
+              mb: { xs: 1 },
+              mr: { xs: 0.6 },
             }}
             >
-            <PostAddIcon/>
+            <PlaylistAddCheckIcon/>
                   <Typography sx={{ display: { xs: 'none', sm: 'inline' } }}>
                     &nbsp;Sort's Save
                   </Typography>
@@ -333,13 +362,15 @@ export function MemoList(): JSX.Element {
               //md: '100%'  // Medium 画面サイズでの幅
             },
             mt: { xs: 1 },
-            mb: { xs: 1 }
+            mb: { xs: 1 },
+            mr: { xs: 0.6 },
           }}
         >
           <TextField
             label="Search memos"
             value={searchKeyword}
             onChange={handleSearchInputChange}
+            sx={{ display: { xs: 'none', sm: 'block' } }} // xs サイズでは非表示
             InputProps={{
               startAdornment: (
                   <InputAdornment position="start">
@@ -348,12 +379,34 @@ export function MemoList(): JSX.Element {
               ),
           }}
           />
-          <Button type="submit" variant="contained">
+          <Button type="submit" variant="contained" onClick={handleSearchButtonClick}>
             <SearchIcon/>
           </Button>
         
         </Box>
         </form>
+        {/* 検索ダイアログ */}
+        <Dialog open={openSearchDialog} onClose={handleCloseSearchDialog}>
+          <DialogTitle>Search Memos</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Search Keyword"
+              fullWidth
+              variant="outlined"
+              value={searchKeyword}
+              onChange={handleSearchInputChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseSearchDialog}>Cancel</Button>
+            <Button onClick={() => {
+              searchMemos(searchKeyword);
+              handleCloseSearchDialog();
+            }}>Search</Button>
+          </DialogActions>
+        </Dialog>
         <Box>
           <Button
             variant="contained"
@@ -363,6 +416,7 @@ export function MemoList(): JSX.Element {
                 xs: '10%', // Extra small 画面サイズでの幅
                 sm: '100%'  // Medium 画面サイズでの幅
               },
+              mr: { xs: 0.6 },
             }}
           >
             <AddCircleIcon/>
