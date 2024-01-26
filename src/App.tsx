@@ -13,7 +13,7 @@ import { useState } from "react";
 import { ViewMemo } from "./services/ViewMemo";
 import {APIKeyPage} from "./pages/APIKeyPage";
 import {Help} from "./pages/Help";
-
+import { Box } from '@mui/system';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,7 +29,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <RecoilRoot>
-      <div style={{ marginRight: isSidebarOpen ? 300 : 0, transition: 'margin-right 0.5s' }}>
+      <Box sx={{ marginRight: { xs: 0, sm: isSidebarOpen ? 20 : 0 }, transition: { xs: 'none', sm: 'margin-right 0.5s' }}}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/memolist" element={<MemoList />} />
@@ -38,7 +38,7 @@ function App() {
             <Route path="/api-key" element={<APIKeyPage />} />
             <Route path="/help" element={<Help />} />
           </Routes>
-        </div>
+          </Box>
         <IconButton className="fixedIconButton" onClick={handleSidebarOpen}>
           <MenuIcon />
         </IconButton>
