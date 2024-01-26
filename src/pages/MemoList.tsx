@@ -357,10 +357,6 @@ export function MemoList(): JSX.Element {
           sx={{
             display: "flex",
             alignItems: "center",
-            width: {
-              xs: '100%', // Extra small 画面サイズでの幅
-              //md: '100%'  // Medium 画面サイズでの幅
-            },
             mt: { xs: 1 },
             mb: { xs: 1 },
             mr: { xs: 0.6 },
